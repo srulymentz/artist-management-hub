@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artist Management Command Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .user-selector {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            z-index: 1500;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 10px 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .user-selector select {
+            background: transparent;
+            border: none;
+            color: #00d4ff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            padding: 20px;
+            z-index: 1000;
+            transition: transform 0.3s;
+        }
+        
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-header h2 {
+            color: #00d4ff;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .nav-item {
+            padding: 15px 20px;
+            margin: 8px 0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .nav-item .icon {
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+        
+        .nav-badge {
+            background: #ff6b6b;
+            color: white;
+            border-radius: 10px;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            min-height: 100vh;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .header-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00d4ff, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header-stats {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        .crisis-alert {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,107,107,0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255,107,107,0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255,107,107,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,107,107,0); }
+        }
+        
+        .crisis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 30px;
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .card-title {
+            font-size: 1.4rem;
+            color: #00d4ff;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-title .icon {
+            margin-right: 10px;
+        }
+        
+        .artist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .artist-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .artist-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #00d4ff, #ff6b6b);
+        }
+        
+        .artist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .artist-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .artist-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .status-established {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border: 1px solid #2ecc71;
+        }
+        
+        .status-developing {
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+            border: 1px solid #f39c12;
+        }
+        
+        .milestone-progress {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .milestone-title {
+            font-size: 1rem;
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+        
+        .milestone-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .milestone-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #2ecc71);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        
+        .milestone-details {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .artist-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .metric {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        
+        .metric-label {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 8px 12px;
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid #00d4ff;
+            border-radius: 20px;
+            color: #00d4ff;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover {
+            background: #00d4ff;
+            color: #1a1a2e;
+        }
+        
+        .creative-opportunities {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .opportunity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 8px 0;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .opportunity-item:hover {
+            background: rgba(0,212,255,0.1);
+        }
+        
+        .opportunity-type {
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.6rem;
+            font-weight: bold;
+        }
+        
+        .type-brand { background: rgba(138, 43, 226, 0.3); color: #9a4bdb; }
+        .type-collab { background: rgba(255, 193, 7, 0.3); color: #ffc107; }
+        .type-content { background: rgba(40, 167, 69, 0.3); color: #28a745; }
+        .type-merch { background: rgba(220, 53, 69, 0.3); color: #dc3545; }
+        
+        .platform-integration {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .platform-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .platform-card:hover {
+            transform: scale(1.05);
+            background: rgba(255,255,255,0.15);
+        }
+        
+        .platform-logo {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .platform-name {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        .platform-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-connected { background: #2ecc71; }
+        .status-pending { background: #f39c12; }
+        .status-disconnected { background: #e74c3c; }
+        
+        .offers-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .offer-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 100px;
+            gap: 20px;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #00d4ff;
+        }
+        
+        .offer-details h4 {
+            color: #00d4ff;
+            margin-bottom: 8px;
+        }
+        
+        .offer-details p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .offer-fee {
+            text-align: center;
+        }
+        
+        .fee-amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2ecc71;
+        }
+        
+        .offer-routing {
+            text-align: center;
+        }
+        
+        .routing-score {
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+        
+        .routing-good { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+        .routing-fair { background: rgba(243, 156, 18, 0.2); color: #f39c12; }
+        .routing-poor { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+        
+        .offer-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .offer-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+        
+        .btn-accept { background: #2ecc71; color: white; }
+        .btn-negotiate { background: #f39c12; color: white; }
+        .btn-decline { background: #e74c3c; color: white; }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: rgba(26, 26, 46, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #00d4ff;
+            font-weight: bold;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .floating-add {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #00d4ff, #ff6b6b);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.3);
+            transition: all 0.3s;
+            z-index: 1500;
+        }
+        
+        .floating-add:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(0, 212, 255, 0.5);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(135deg, #00d4ff, #ff6b6b);
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding: 20px 0 20px 70px;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 25px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00d4ff;
+            border: 3px solid #1a1a2e;
+        }
+        
+        .timeline-date {
+            color: #00d4ff;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-content {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .admin-delegation {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .delegation-task {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            border-left: 3px solid #f39c12;
+        }
+        
+        .delegate-btn {
+            padding: 6px 12px;
+            background: rgba(243, 156, 18, 0.2);
+            border: 1px solid #f39c12;
+            border-radius: 15px;
+            color: #f39c12;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .delegate-btn:hover {
+            background: #f39c12;
+            color: #1a1a2e;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .artist-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .platform-integration {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .offer-item {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- User Selector -->
+    <div class="user-selector">
+        <select id="userSelect" onchange="switchUser()">
+            <option value="manager1">Manager (You)</option>
+            <option value="manager2">Partner Manager</option>
+            <option value="admin">Admin Assistant</option>
+        </select>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Command Center</h2>
+            <p>Electronic Music Management</p>
+        </div>
+        
+        <div class="nav-item active" onclick="showSection('dashboard')">
+            <div>
+                <span class="icon">🎯</span>
+                <span>Dashboard</span>
+            </div>
+        </div>
+        
+        <div class="nav-item" onclick="showSection('artists')">
+            <div>
+                <span class="icon">👥</span>
+                <span>Artists</span>
+            </div>
+        </div>
+        
+        <div class="nav-item" onclick="showSection('offers')">
+            <div>
+                <span class="icon">📧</span>
+                <span>Booking Offers</span>
+            </div>
+            <span class="nav-badge" id="offersBadge">3</span>
+        </div>
+        
+        <div class="nav-item" onclick="showSection('creative')">
+            <div>
+                <span class="icon">💡</span>
+                <span>Creative Hub</span>
+            </div>
+        </div>
+        
+        <div class="nav-item" onclick="showSection('crisis')">
+            <div>
+                <span class="icon">🚨</span>
+                <span>Tour Crisis</span>
+            </div>
+            <span class="nav-badge" id="crisisBadge">1</span>
+        </div>
+        
+        <div class="nav-item" onclick="showSection('analytics')">
+            <div>
+                <span class="icon">📊</span>
+                <span>Analytics</span>
+            </div>
+        </div>
+        
+        <div class="nav-item" onclick="showSection('delegation')">
+            <div>
+                <span class="icon">📋</span>
+                <span>Admin Tasks</span>
+            </div>
+            <span class="nav-badge" id="adminBadge">5</span>
+        </div>
+        
+        <div class="nav-item" onclick="showSection('integrations')">
+            <div>
+                <span class="icon">🔗</span>
+                <span>Integrations</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="dashboard-header">
+            <div class="header-info">
+                <h1>Artist Management Hub</h1>
+                <p>Electronic Music Command Center - House, Techno, Tech House Focus</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="activeArtists">5</div>
+                    <div class="stat-label">Active Artists</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="pendingOffers">3</div>
+                    <div class="stat-label">Pending Offers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="crisisItems">1</div>
+                    <div class="stat-label">Crisis Items</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="monthlyRevenue">$48K</div>
+                    <div class="stat-label">Monthly Revenue</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Crisis Alert -->
+        <div class="crisis-alert" id="crisisAlert">
+            <div class="crisis-header">
+                <h3>🚨 TOUR CRISIS - Immediate Action Required</h3>
+                <button onclick="dismissCrisis()" style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer;">✕</button>
+            </div>
+            <p><strong>Adam Sellouk - Amsterdam Tour:</strong> Venue has technical issues, need backup sound system ASAP. Show in 4 hours!</p>
+            <div style="margin-top: 15px;">
+                <button class="btn" onclick="handleCrisis('resolve')">Mark Resolved</button>
+                <button class="btn btn-secondary" onclick="handleCrisis('delegate')">Delegate to Admin</button>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="section">
+            <div class="artist-grid">
+                <div class="artist-card">
+                    <div class="artist-header">
+                        <div class="artist-name">Adam Sellouk</div>
+                        <div class="artist-status status-established">Established</div>
+                    </div>
+                    
+                    <!-- Milestone Progress -->
+                    <div class="milestone-progress">
+                        <div class="milestone-title">🎯 Next Major Milestone: Ultra Europe 2026</div>
+                        <div class="milestone-bar">
+                            <div class="milestone-fill" style="width: 75%"></div>
+                        </div>
+                        <div class="milestone-details">Contract negotiations 75% complete</div>
+                    </div>
+                    
+                    <div class="artist-metrics">
+                        <div class="metric">
+                            <div class="metric-value">15</div>
+                            <div class="metric-label">Shows</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">3</div>
+                            <div class="metric-label">Releases</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">85K</div>
+                            <div class="metric-label">Spotify</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">$35K</div>
+                            <div class="metric-label">Revenue</div>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-actions">
+                        <div class="action-btn" onclick="openModal('offerModal', 'Adam Sellouk')">Review Offers</div>
+                        <div class="action-btn" onclick="openModal('taskModal', 'Adam Sellouk')">Add Task</div>
+                        <div class="action-btn" onclick="openModal('creativeModal', 'Adam Sellouk')">Creative Ideas</div>
+                        <div class="action-btn" onclick="openModal('notesModal', 'Adam Sellouk')">Notes</div>
+                    </div>
+                    
+                    <!-- Creative Opportunities -->
+                    <div class="creative-opportunities">
+                        <h4 style="color: #00d4ff; margin-bottom: 10px;">💡 Creative Opportunities</h4>
+                        <div class="opportunity-item" onclick="expandOpportunity(this)">
+                            <span>Brand partnership with Pioneer DJ</span>
+                            <span class="opportunity-type type-brand">BRAND</span>
+                        </div>
+                        <div class="opportunity-item" onclick="expandOpportunity(this)">
+                            <span>Remix collaboration with Charlotte de Witte</span>
+                            <span class="opportunity-type type-collab">COLLAB</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="artist-card">
+                    <div class="artist-header">
+                        <div class="artist-name">New Artist #1</div>
+                        <div class="artist-status status-developing">Development</div>
+                    </div>
+                    
+                    <!-- Milestone Progress -->
+                    <div class="milestone-progress">
+                        <div class="milestone-title">🎯 First Big Win: Label Release</div>
+                        <div class="milestone-bar">
+                            <div class="milestone-fill" style="width: 40%"></div>
+                        </div>
+                        <div class="milestone-details">Demo submitted to 3 major labels</div>
+                    </div>
+                    
+                    <div class="artist-metrics">
+                        <div class="metric">
+                            <div class="metric-value">0</div>
+                            <div class="metric-label">Shows</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">1</div>
+                            <div class="metric-label">Demo</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">2.1K</div>
+                            <div class="metric-label">IG</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">$2K</div>
+                            <div class="metric-label">Invest</div>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-actions">
+                        <div class="action-btn" onclick="openModal('developmentModal', 'New Artist #1')">Dev Plan</div>
+                        <div class="action-btn" onclick="openModal('taskModal', 'New Artist #1')">Add Task</div>
+                        <div class="action-btn" onclick="openModal('creativeModal', 'New Artist #1')">Ideas</div>
+                        <div class="action-btn" onclick="openModal('notesModal', 'New Artist #1')">Notes</div>
+                    </div>
+                    
+                    <!-- Creative Opportunities -->
+                    <div class="creative-opportunities">
+                        <h4 style="color: #00d4ff; margin-bottom: 10px;">💡 Creative Opportunities</h4>
+                        <div class="opportunity-item">
+                            <span>TikTok content strategy for track promo</span>
+                            <span class="opportunity-type type-content">CONTENT</span>
+                        </div>
+                        <div class="opportunity-item">
+                            <span>Limited edition vinyl merchandise</span>
+                            <span class="opportunity-type type-merch">MERCH</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Platform Integration -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span class="icon">🔗</span>
+                        Tool Integration Status
+                    </h3>
+                </div>
+                
+                <div class="platform-integration">
+                    <div class="platform-card" onclick="connectPlatform('notion')">
+                        <div class="platform-logo">📝</div>
+                        <div class="platform-name">Notion</div>
+                        <div class="platform-status">
+                            <div class="status-dot status-connected"></div>
+                            <span>Connected</span>
+                        </div>
+                    </div>
+                    
+                    <div class="platform-card" onclick="connectPlatform('roster')">
+                        <div class="platform-logo">📊</div>
+                        <div class="platform-name">Roster</div>
+                        <div class="platform-status">
+                            <div class="status-dot status-connected"></div>
+                            <span>Connected</span>
+                        </div>
+                    </div>
+                    
+                    <div class="platform-card" onclick="connectPlatform('chartmetric')">
+                        <div class="platform-logo">📈</div>
+                        <div class="platform-name">ChartMetric</div>
+                        <div class="platform-status">
+                            <div class="status-dot status-pending"></div>
+                            <span>Setup Required</span>
+                        </div>
+                    </div>
+                    
+                    <div class="platform-card" onclick="connectPlatform('gmail')">
+                        <div class="platform-logo">📧</div>
+                        <div class="platform-name">Gmail</div>
+                        <div class="platform-status">
+                            <div class="status-dot status-connected"></div>
+                            <span>Connected</span>
+                        </div>
+                    </div>
+                    
+                    <div class="platform-card" onclick="connectPlatform('gdrive')">
+                        <div class="platform-logo">📁</div>
+                        <div class="platform-name">Google Drive</div>
+                        <div class="platform-status">
+                            <div class="status-dot status-connected"></div>
+                            <span>Connected</span>
+                        </div>
+                    </div>
+                    
+                    <div class="platform-card" onclick="connectPlatform('dropbox')">
+                        <div class="platform-logo">📦</div>
+                        <div class="platform-name">Dropbox</div>
+                        <div class="platform-status">
+                            <div class="status-dot status-connected"></div>
+                            <span>Connected</span>
+                        </div>
+                    </div>
+                    
+                    <div class="platform-card" onclick="connectPlatform('gsheets')">
+                        <div class="platform-logo">📊</div>
+                        <div class="platform-name">Google Sheets</div>
+                        <div class="platform-status">
+                            <div class="status-dot status-connected"></div>
+                            <span>Connected</span>
+                        </div>
+                    </div>
+                    
+                    <div class="platform-card" onclick="connectPlatform('apple-calendar')">
+                        <div class="platform-logo">🍎</div>
+                        <div class="platform-name">Apple Calendar</div>
+                        <div class="platform-status">
+                            <div class="status-dot status-disconnected"></div>
+                            <span>Connect</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Timeline -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span class="icon">⏰</span>
+                        Recent Activity
+                    </h3>
+                </div>
+                
+                <div class="timeline" id="activityTimeline">
+                    <div class="timeline-item">
+                        <div class="timeline-date">Today, 2:30 PM</div>
+                        <div class="timeline-content">
+                            <strong>Adam Sellouk</strong> - NEW OFFER: Ultra Europe 2026 main stage ($75K)
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-date">Yesterday, 4:15 PM</div>
+                        <div class="timeline-content">
+                            <strong>New Artist #1</strong> - Demo submitted to Anjunadeep, Toolroom, and STMPD
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-date">2 days ago</div>
+                        <div class="timeline-content">
+                            <strong>ChartMetric Alert</strong> - Adam's new track gained +15K Spotify streams (viral potential)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Offers Section -->
+        <div id="offers-section" class="section hidden">
+            <div class="offers-section">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span class="icon">📧</span>
+                        Pending Booking Offers
+                    </h3>
+                </div>
+                
+                <div class="offer-item">
+                    <div class="offer-details">
+                        <h4>Ultra Europe 2026 - Main Stage</h4>
+                        <p><strong>Artist:</strong> Adam Sellouk</p>
+                        <p><strong>Date:</strong> July 12, 2026 | Split, Croatia</p>
+                        <p><strong>Agent:</strong> Sarah Johnson (Ultra Worldwide)</p>
+                    </div>
+                    
+                    <div class="offer-fee">
+                        <div class="fee-amount">$75,000</div>
+                        <small>Performance Fee</small>
+                    </div>
+                    
+                    <div class="offer-routing">
+                        <div class="routing-score routing-good">Excellent</div>
+                        <small>Perfect routing with Tomorrowland</small>
+                    </div>
+                    
+                    <div class="offer-actions">
+                        <button class="offer-btn btn-accept" onclick="handleOffer('accept', 1)">Accept</button>
+                        <button class="offer-btn btn-negotiate" onclick="handleOffer('negotiate', 1)">Negotiate</button>
+                        <button class="offer-btn btn-decline" onclick="handleOffer('decline', 1)">Decline</button>
+                    </div>
+                </div>
+                
+                <div class="offer-item">
+                    <div class="offer-details">
+                        <h4>Berlin Warehouse Party</h4>
+                        <p><strong>Artist:</strong> Adam Sellouk</p>
+                        <p><strong>Date:</strong> March 15, 2026 | Berlin, Germany</p>
+                        <p><strong>Agent:</strong> Mark Weber (Berlin Collective)</p>
+                    </div>
+                    
+                    <div class="offer-fee">
+                        <div class="fee-amount">€15,000</div>
+                        <small>Performance Fee</small>
+                    </div>
+                    
+                    <div class="offer-routing">
+                        <div class="routing-score routing-fair">Fair</div>
+                        <small>Conflicts with Amsterdam show</small>
+                    </div>
+                    
+                    <div class="offer-actions">
+                        <button class="offer-btn btn-accept" onclick="handleOffer('accept', 2)">Accept</button>
+                        <button class="offer-btn btn-negotiate" onclick="handleOffer('negotiate', 2)">Negotiate</button>
+                        <button class="offer-btn btn-decline" onclick="handleOffer('decline', 2)">Decline</button>
+                    </div>
+                </div>
+                
+                <div class="offer-item">
+                    <div class="offer-details">
+                        <h4>Miami Music Week - Pool Party</h4>
+                        <p><strong>Artist:</strong> New Artist #1</p>
+                        <p><strong>Date:</strong> March 28, 2026 | Miami, USA</p>
+                        <p><strong>Agent:</strong> Lisa Martinez (MMW Collective)</p>
+                    </div>
+                    
+                    <div class="offer-fee">
+                        <div class="fee-amount">$8,500</div>
+                        <small>Performance Fee</small>
+                    </div>
+                    
+                    <div class="offer-routing">
+                        <div class="routing-score routing-good">Good</div>
+                        <small>Great exposure opportunity</small>
+                    </div>
+                    
+                    <div class="offer-actions">
+                        <button class="offer-btn btn-accept" onclick="handleOffer('accept', 3)">Accept</button>
+                        <button class="offer-btn btn-negotiate" onclick="handleOffer('negotiate', 3)">Negotiate</button>
+                        <button class="offer-btn btn-decline" onclick="handleOffer('decline', 3)">Decline</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Delegation Section -->
+        <div id="delegation-section" class="section hidden">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span class="icon">📋</span>
+                        Admin Task Delegation
+                    </h3>
+                </div>
+                
+                <div class="admin-delegation">
+                    <div class="delegation-task">
+                        <div>
+                            <strong>Tour Logistics:</strong> Book flights and hotel for Adam's European tour (5 cities)
+                            <br><small>Priority: High | Due: Next Week</small>
+                        </div>
+                        <button class="delegate-btn" onclick="delegateTask(1)">Delegate</button>
+                    </div>
+                    
+                    <div class="delegation-task">
+                        <div>
+                            <strong>Label Coordination:</strong> Gather all assets for New Artist #1's Anjunadeep submission
+                            <br><small>Priority: Medium | Due: Friday</small>
+                        </div>
+                        <button class="delegate-btn" onclick="delegateTask(2)">Delegate</button>
+                    </div>
+                    
+                    <div class="delegation-task">
+                        <div>
+                            <strong>Financial Tracking:</strong> Update Q4 revenue spreadsheet with all bookings
+                            <br><small>Priority: Medium | Due: Month End</small>
+                        </div>
+                        <button class="delegate-btn" onclick="delegateTask(3)">Delegate</button>
+                    </div>
+                    
+                    <div class="delegation-task">
+                        <div>
+                            <strong>Contract Management:</strong> Send signed contracts for 3 upcoming shows
+                            <br><small>Priority: High | Due: Tomorrow</small>
+                        </div>
+                        <button class="delegate-btn" onclick="delegateTask(4)">Delegate</button>
+                    </div>
+                    
+                    <div class="delegation-task">
+                        <div>
+                            <strong>Social Coordination:</strong> Schedule Instagram posts for Adam's tour announcement
+                            <br><small>Priority: Low | Due: Next Week</small>
+                        </div>
+                        <button class="delegate-btn" onclick="delegateTask(5)">Delegate</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other sections placeholders -->
+        <div id="artists-section" class="section hidden">
+            <h2>Detailed Artist Management</h2>
+            <!-- Content will be expanded -->
+        </div>
+
+        <div id="creative-section" class="section hidden">
+            <h2>Creative Hub & Brand Expansion</h2>
+            <!-- Content will be expanded -->
+        </div>
+
+        <div id="crisis-section" class="section hidden">
+            <h2>Tour Crisis Management</h2>
+            <!-- Content will be expanded -->
+        </div>
+
+        <div id="analytics-section" class="section hidden">
+            <h2>Analytics Dashboard</h2>
+            <!-- Content will be expanded -->
+        </div>
+
+        <div id="integrations-section" class="section hidden">
+            <h2>Platform Integrations</h2>
+            <!-- Content will be expanded -->
+        </div>
+    </div>
+
+    <!-- Floating Add Button -->
+    <button class="floating-add" onclick="openModal('quickAddModal')">+</button>
+
+    <!-- Modals -->
+    <div id="quickAddModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Quick Actions</h3>
+                <button class="close-btn" onclick="closeModal('quickAddModal')">&times;</button>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <button class="btn" onclick="openModal('taskModal'); closeModal('quickAddModal')">Add Task</button>
+                <button class="btn" onclick="openModal('offerModal'); closeModal('quickAddModal')">Log Offer</button>
+                <button class="btn" onclick="openModal('creativeModal'); closeModal('quickAddModal')">Creative Idea</button>
+                <button class="btn" onclick="openModal('crisisModal'); closeModal('quickAddModal')">Crisis Item</button>
+                <button class="btn" onclick="openModal('notesModal'); closeModal('quickAddModal')">Artist Notes</button>
+                <button class="btn" onclick="connectPlatform('chartmetric'); closeModal('quickAddModal')">Sync Analytics</button>
+                <button class="btn" onclick="openModal('delegateModal'); closeModal('quickAddModal')">Delegate Task</button>
+                <button class="btn" onclick="openModal('milestoneModal'); closeModal('quickAddModal')">Update Milestone</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="notesModalTitle">Artist Notes</h3>
+                <button class="close-btn" onclick="closeModal('notesModal')">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Quick Ideas & Thoughts</label>
+                <textarea id="quickNotes" rows="3" placeholder="Jot down quick ideas, thoughts, or reminders..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Creative Direction & Brand Expansion</label>
+                <textarea id="creativeNotes" rows="3" placeholder="Brand partnerships, merchandising ideas, collaboration opportunities..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Business & Strategy</label>
+                <textarea id="businessNotes" rows="3" placeholder="Marketing strategies, business opportunities, networking notes..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Meeting Notes & Decisions</label>
+                <textarea id="meetingNotes" rows="4" placeholder="Meeting summaries, action items, decisions made..."></textarea>
+            </div>
+            
+            <button class="btn" onclick="saveArtistNotes()">Save Notes</button>
+            <button class="btn btn-secondary" onclick="closeModal('notesModal')">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // Global Data
+        let currentUser = 'manager1';
+        let artistData = {
+            'Adam Sellouk': {
+                status: 'established',
+                revenue: 35000,
+                shows: 15,
+                releases: 3,
+                milestone: 'Ultra Europe 2026',
+                milestoneProgress: 75,
+                notes: {
+                    quick: 'Potential collaboration with Martin Garrix. Moving towards more melodic techno sound.',
+                    creative: 'Brand partnership opportunities with Pioneer DJ and Beatport. Consider limited vinyl releases.',
+                    business: 'Contract renewal due Q1 2026. Ultra Europe main stage confirmed for July 2026.',
+                    meeting: 'Last meeting: Discussed European tour routing. Confirmed 5-city tour for March 2026.'
+                }
+            },
+            'New Artist #1': {
+                status: 'developing',
+                revenue: 0,
+                shows: 0,
+                releases: 0,
+                milestone: 'First Label Release',
+                milestoneProgress: 40,
+                notes: {
+                    quick: 'Strong house music producer, good work ethic, needs brand development.',
+                    creative: 'Focus on TikTok content strategy, consider remix opportunities with established artists.',
+                    business: 'Demo submitted to Anjunadeep, Toolroom, STMPD. Awaiting responses.',
+                    meeting: 'Initial meeting completed. Set development timeline and budget allocation.'
+                }
+            }
+        };
+
+        let bookingOffers = [];
+        let crisisItems = [];
+        let adminTasks = [];
+        let currentNotesArtist = null;
+
+        // User Management
+        function switchUser() {
+            currentUser = document.getElementById('userSelect').value;
+            updateUIForUser();
+        }
+
+        function updateUIForUser() {
+            // Update UI based on user role
+            const delegationSection = document.querySelector('.nav-item:nth-child(7)');
+            if (currentUser === 'admin') {
+                delegationSection.style.display = 'block';
+            } else {
+                delegationSection.style.display = 'block'; // Managers can see admin tasks
+            }
+        }
+
+        // Navigation
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            document.getElementById(sectionName + '-section').classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+        }
+
+        // Modal Management
+        function openModal(modalId, artistName = null) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+                
+                if (modalId === 'notesModal' && artistName) {
+                    currentNotesArtist = artistName;
+                    loadArtistNotes(artistName);
+                    document.getElementById('notesModalTitle').textContent = `${artistName} - Notes`;
+                }
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            if (modalId === 'notesModal') {
+                currentNotesArtist = null;
+            }
+        }
+
+        // Notes Management
+        function loadArtistNotes(artistName) {
+            const notes = artistData[artistName].notes;
+            document.getElementById('quickNotes').value = notes.quick || '';
+            document.getElementById('creativeNotes').value = notes.creative || '';
+            document.getElementById('businessNotes').value = notes.business || '';
+            document.getElementById('meetingNotes').value = notes.meeting || '';
+        }
+
+        function saveArtistNotes() {
+            if (!currentNotesArtist) return;
+            
+            artistData[currentNotesArtist].notes = {
+                quick: document.getElementById('quickNotes').value,
+                creative: document.getElementById('creativeNotes').value,
+                business: document.getElementById('businessNotes').value,
+                meeting: document.getElementById('meetingNotes').value
+            };
+            
+            closeModal('notesModal');
+            addTimelineItem(`Notes updated for ${currentNotesArtist}`, 'just now');
+        }
+
+        // Crisis Management
+        function dismissCrisis() {
+            document.getElementById('crisisAlert').style.display = 'none';
+            updateCrisisCount();
+        }
+
+        function handleCrisis(action) {
+            if (action === 'resolve') {
+                dismissCrisis();
+                addTimelineItem('<strong>Crisis Resolved:</strong> Amsterdam venue technical issues fixed', 'just now');
+            } else if (action === 'delegate') {
+                dismissCrisis();
+                addTimelineItem('<strong>Crisis Delegated:</strong> Admin handling venue technical issues', 'just now');
+                addAdminTask('URGENT: Handle Amsterdam venue technical issues for Adam Sellouk show');
+            }
+        }
+
+        // Offer Management
+        function handleOffer(action, offerId) {
+            const offerElement = document.querySelector(`[data-offer-id="${offerId}"]`) || 
+                                document.querySelectorAll('.offer-item')[offerId - 1];
+            
+            if (action === 'accept') {
+                offerElement.style.borderLeftColor = '#2ecc71';
+                addTimelineItem('<strong>Offer Accepted:</strong> Booking confirmed and contract sent', 'just now');
+            } else if (action === 'negotiate') {
+                offerElement.style.borderLeftColor = '#f39c12';
+                addTimelineItem('<strong>Offer Negotiation:</strong> Counter-offer sent to agent', 'just now');
+            } else if (action === 'decline') {
+                offerElement.style.opacity = '0.5';
+                addTimelineItem('<strong>Offer Declined:</strong> Booking declined with thanks', 'just now');
+            }
+            
+            updateOfferCount();
+        }
+
+        // Platform Integration
+        function connectPlatform(platform) {
+            const platformCard = event.target.closest('.platform-card');
+            if (platformCard) {
+                const statusDot = platformCard.querySelector('.status-dot');
+                const statusText = platformCard.querySelector('span');
+                
+                statusDot.className = 'status-dot status-connected';
+                statusText.textContent = 'Connected';
+                
+                addTimelineItem(`<strong>${platform.charAt(0).toUpperCase() + platform.slice(1)}</strong> integration completed`, 'just now');
+            }
+        }
+
+        // Admin Delegation
+        function delegateTask(taskId) {
+            const taskElement = document.querySelectorAll('.delegation-task')[taskId - 1];
+            taskElement.style.opacity = '0.6';
+            taskElement.style.borderLeftColor = '#2ecc71';
+            
+            const delegateBtn = taskElement.querySelector('.delegate-btn');
+            delegateBtn.textContent = 'Delegated';
+            delegateBtn.style.background = 'rgba(46, 204, 113, 0.2)';
+            delegateBtn.style.color = '#2ecc71';
+            
+            addTimelineItem('<strong>Task Delegated:</strong> Admin assistant assigned new task', 'just now');
+            updateAdminCount();
+        }
+
+        function addAdminTask(taskDescription) {
+            adminTasks.push({
+                id: Date.now(),
+                description: taskDescription,
+                priority: 'high',
+                assigned: false
+            });
+            updateAdminCount();
+        }
+
+        // Creative Opportunities
+        function expandOpportunity(element) {
+            const expanded = element.getAttribute('data-expanded') === 'true';
+            
+            if (!expanded) {
+                element.innerHTML += '<br><small style="color: #00d4ff;">💡 Click to explore this opportunity further or add to action items</small>';
+                element.setAttribute('data-expanded', 'true');
+            } else {
+                // Reset to original state
+                const text = element.innerHTML.split('<br>')[0];
+                element.innerHTML = text;
+                element.setAttribute('data-expanded', 'false');
+            }
+        }
+
+        // Utility Functions
+        function addTimelineItem(content, time) {
+            const timeline = document.getElementById('activityTimeline');
+            const newItem = document.createElement('div');
+            newItem.className = 'timeline-item';
+            newItem.innerHTML = `
+                <div class="timeline-date">${time}</div>
+                <div class="timeline-content">${content}</div>
+            `;
+            timeline.insertBefore(newItem, timeline.firstChild);
+        }
+
+        function updateOfferCount() {
+            const count = document.querySelectorAll('.offer-item:not([style*="opacity: 0.5"])').length;
+            document.getElementById('offersBadge').textContent = count;
+            document.getElementById('pendingOffers').textContent = count;
+        }
+
+        function updateCrisisCount() {
+            const count = document.querySelectorAll('.crisis-alert:not([style*="display: none"])').length;
+            document.getElementById('crisisBadge').textContent = count;
+            document.getElementById('crisisItems').textContent = count;
+        }
+
+        function updateAdminCount() {
+            const count = adminTasks.filter(task => !task.assigned).length;
+            document.getElementById('adminBadge').textContent = count;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load persistent data
+            loadData();
+            
+            // Initialize UI
+            updateUIForUser();
+            updateOfferCount();
+            updateCrisisCount();
+            updateAdminCount();
+            
+            // Load timeline from saved data
+            timelineItems.forEach(item => {
+                const timeline = document.getElementById('activityTimeline');
+                if (timeline) {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'timeline-item';
+                    itemElement.innerHTML = `
+                        <div class="timeline-date">${item.time}</div>
+                        <div class="timeline-content">${item.content}</div>
+                    `;
+                    timeline.appendChild(itemElement);
+                }
+            });
+            
+            // Add initial timeline item if no saved data
+            if (timelineItems.length === 0) {
+                setTimeout(() => {
+                    addTimelineItem('<strong>System:</strong> Artist Management Hub initialized with persistent storage', 'just now');
+                    addTimelineItem('<strong>Welcome:</strong> All data now saves automatically between sessions', 'just now');
+                }, 1000);
+            }
+            
+            // Auto-save every 30 seconds
+            setInterval(() => {
+                saveData();
+            }, 30000);
+        });
+
+        // Creative Opportunities
+        function expandOpportunity(element) {
+            const expanded = element.getAttribute('data-expanded') === 'true';
+            
+            if (!expanded) {
+                element.innerHTML += '<br><small style="color: #00d4ff;">💡 Click to explore this opportunity further or add to action items</small>';
+                element.setAttribute('data-expanded', 'true');
+            } else {
+                // Reset to original state
+                const text = element.innerHTML.split('<br>')[0];
+                element.innerHTML = text;
+                element.setAttribute('data-expanded', 'false');
+            }
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+            }
+        });
+
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        }
+    </script>
+</body>
+</html>
