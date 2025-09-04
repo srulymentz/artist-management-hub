@@ -1,1 +1,26 @@
-
+{
+  "name": "artist-management-hub",
+  "version": "1.0.0",
+  "description": "Electronic Music Artist Management Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "keywords": [
+    "artist-management",
+    "electronic-music",
+    "booking",
+    "management",
+    "dashboard"
+  ],
+  "author": "Your Management Company",
+  "license": "MIT"
+}
