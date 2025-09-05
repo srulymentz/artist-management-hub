@@ -1,86 +1,73 @@
 // Artist Management Hub - Main Application
 class ArtistManagementApp {
     constructor() {
+        console.log('App starting...');
         this.data = {
-            artists: [
-                {
-                    id: 'adam-sellouk',
-                    name: 'Adam Sellouk',
-                    genre: 'Electronic/House',
-                    status: 'established',
-                    monthlyRevenue: 35000,
-                    email: 'adam@example.com',
-                    phone: '+1-555-0123'
-                }
-            ],
             bookings: [
                 {
-                    id: 'booking-1',
-                    artistId: 'adam-sellouk',
+                    id: 'booking1',
                     artistName: 'Adam Sellouk',
                     venue: 'Flight TLV-ATH-SAW',
                     date: '2025-09-13',
                     time: '05:00',
-                    fee: 351.00,
+                    fee: 351,
                     status: 'confirmed',
                     type: 'travel',
-                    details: 'Aegean / Pegasus Airlines - Confirmation: XXASFT / 16PU8S - Departure 05:00AM, Arrival 11:50AM'
+                    details: 'Aegean/Pegasus - Confirmation: XXASFT/16PU8S'
                 },
                 {
-                    id: 'booking-2',
-                    artistId: 'adam-sellouk',
+                    id: 'booking2',
                     artistName: 'Adam Sellouk',
                     venue: 'Flight IST-RMO-TLV',
                     date: '2025-09-14',
                     time: '09:30',
-                    fee: 213.50,
+                    fee: 213,
                     status: 'confirmed',
                     type: 'travel',
-                    details: 'FlyOne Airlines - Confirmation: G89DTG - Departure 09:30AM, Arrival 17:30PM'
+                    details: 'FlyOne - Confirmation: G89DTG'
                 },
                 {
-                    id: 'booking-3',
-                    artistId: 'adam-sellouk',
+                    id: 'booking3',
                     artistName: 'Adam Sellouk',
                     venue: 'Flight TLV-MXP',
                     date: '2025-09-19',
                     time: '04:55',
-                    fee: 356.22,
+                    fee: 356,
                     status: 'confirmed',
                     type: 'travel',
-                    details: 'Neos Airlines - Confirmation: 9A8CIE - Departure 04:55AM, Arrival 08:05AM'
+                    details: 'Neos - Confirmation: 9A8CIE'
                 },
                 {
-                    id: 'booking-4',
-                    artistId: 'adam-sellouk',
+                    id: 'booking4',
                     artistName: 'Adam Sellouk',
                     venue: 'Flight MXP-IBZ',
                     date: '2025-09-19',
                     time: '14:20',
-                    fee: 254.26,
+                    fee: 254,
                     status: 'confirmed',
                     type: 'travel',
-                    details: 'Easy Jet - Confirmation: KB2HZZ4 - Departure 14:20PM, Arrival 16:15PM - Window Seat'
+                    details: 'Easy Jet - Confirmation: KB2HZZ4'
                 },
                 {
-                    id: 'booking-5',
-                    artistId: 'adam-sellouk',
+                    id: 'booking5',
                     artistName: 'Adam Sellouk',
-                    venue: 'Ibiza Performance',
+                    venue: 'Ibiza Show',
                     date: '2025-09-19',
                     time: '20:00',
                     fee: 5000,
                     status: 'confirmed',
                     type: 'performance',
-                    details: 'Show time: 20:00-21:30 - Main stage performance'
+                    details: 'Performance: 20:00-21:30'
                 }
             ],
+            artists: [],
             opportunities: [],
             crises: [],
             tasks: [],
             calendarEvents: []
         };
         
+        console.log('Initial bookings:', this.data.bookings);
         this.currentSection = 'dashboard';
         this.currentDate = new Date();
         
@@ -280,8 +267,10 @@ class ArtistManagementApp {
 
     renderBookings() {
         const container = document.getElementById('bookings-list');
+        console.log('Rendering bookings, data:', this.data.bookings);
         
         if (this.data.bookings.length === 0) {
+            console.log('No bookings found');
             container.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-calendar-plus"></i>
@@ -292,6 +281,7 @@ class ArtistManagementApp {
             return;
         }
 
+        console.log('Rendering', this.data.bookings.length, 'bookings');
         container.innerHTML = `
             <div class="bookings-table">
                 <div class="bookings-header">
