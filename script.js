@@ -171,6 +171,65 @@ class ArtistManagementHub {
         `;
     }
 
+    renderUpcomingTasks() {
+        const container = document.getElementById('upcoming-tasks-list');
+        if (!container) return;
+        
+        const now = new Date();
+        const sevenDaysFromNow = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000));
+        
+        const upcomingTasks = this.data.tasks
+            .filter(task => !task.completed)
+            .filter(task => {
+                const dueDate = new Date(task.dueDate);
+                return dueDate <= sevenDaysFromNow;
+            })
+            .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+        
+        if (upcomingTasks.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-check-circle"></i>
+                    <p>No upcoming tasks</p>
+                    <small>You're all caught up!</small>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = upcomingTasks.map(task => {
+            const dueDate = new Date(task.dueDate);
+            const isOverdue = dueDate < now;
+            const isToday = dueDate.toDateString() === now.toDateString();
+            const isTomorrow = dueDate.toDateString() === new Date(now.getTime() + 24 * 60 * 60 * 1000).toDateString();
+            
+            let dueDateLabel = dueDate.toLocaleDateString();
+            if (isOverdue) dueDateLabel = 'Overdue';
+            else if (isToday) dueDateLabel = 'Due today';
+            else if (isTomorrow) dueDateLabel = 'Due tomorrow';
+            
+            const artist = task.artistId ? this.data.artists.find(a => a.id === task.artistId) : null;
+            
+            return `
+                <div class="task-item priority-${task.priority} ${isOverdue ? 'overdue' : ''}">
+                    <div class="task-content">
+                        <div class="task-header">
+                            <h4>${task.title}</h4>
+                            <button onclick="completeTask('${task.id}')" class="task-complete-btn">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </div>
+                        ${task.description ? `<p class="task-description">${task.description}</p>` : ''}
+                        <div class="task-meta">
+                            ${artist ? `<span class="task-artist">${artist.name}</span>` : ''}
+                            <span class="task-due ${isOverdue ? 'overdue' : isToday ? 'today' : ''}">${dueDateLabel}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
     // Artists Management
     renderArtists() {
         const container = document.getElementById('artists-grid');
