@@ -358,6 +358,9 @@ class ArtistManagementApp {
         
         if (!monthYear || !calendarGrid) return;
 
+        // Make sure bookings are synced to calendar
+        this.syncBookingsToCalendar();
+
         const year = this.currentDate.getFullYear();
         const month = this.currentDate.getMonth();
         
@@ -398,8 +401,8 @@ class ArtistManagementApp {
                     <div class="calendar-day-number">${currentDate.getDate()}</div>
                     <div class="calendar-day-events">
                         ${dayEvents.map(event => `
-                            <div class="calendar-event ${event.type}" title="${event.title}">
-                                ${event.title}
+                            <div class="calendar-event ${event.type}" title="${event.title} - ${event.time || ''} ${event.fee ? '$' + event.fee : ''}">
+                                ${event.title} ${event.time ? event.time : ''}
                             </div>
                         `).join('')}
                     </div>
@@ -441,8 +444,9 @@ class ArtistManagementApp {
                         </div>
                         <div class="event-type">
                             <i class="fas fa-tag"></i>
-                            ${event.type}
+                            ${event.type} ${event.fee ? '- $' + event.fee.toLocaleString() : ''}
                         </div>
+                        ${event.details ? `<div class="event-details-text"><i class="fas fa-info-circle"></i> ${event.details}</div>` : ''}
                     </div>
                 </div>
             </div>
@@ -544,6 +548,34 @@ class ArtistManagementApp {
                 }
             ];
         }
+        
+        // Automatically sync bookings to calendar events
+        this.syncBookingsToCalendar();
+    }
+
+    syncBookingsToCalendar() {
+        // Clear existing booking-based calendar events
+        this.data.calendarEvents = this.data.calendarEvents.filter(event => event.source !== 'booking');
+        
+        // Convert confirmed bookings to calendar events
+        this.data.bookings.forEach(booking => {
+            if (booking.status === 'confirmed') {
+                const calendarEvent = {
+                    id: `cal-${booking.id}`,
+                    title: `${booking.artistName} - ${booking.venue}`,
+                    date: booking.date,
+                    time: booking.time,
+                    type: booking.type === 'performance' ? 'booking' : 'task',
+                    source: 'booking',
+                    details: booking.details,
+                    fee: booking.fee,
+                    artist: booking.artistName
+                };
+                this.data.calendarEvents.push(calendarEvent);
+            }
+        });
+        
+        console.log('Synced bookings to calendar:', this.data.calendarEvents.length, 'events');
     }
 
     saveData() {
