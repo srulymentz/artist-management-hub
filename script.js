@@ -693,9 +693,12 @@ class ArtistManagementApp {
     }
 
     renderSettings() {
-        if (window.integrations) {
-            window.integrations.renderIntegrations();
-        }
+        // Ensure integrations are rendered when settings tab is shown
+        setTimeout(() => {
+            if (window.integrations) {
+                window.integrations.renderIntegrations();
+            }
+        }, 100);
     }
 
     // Navigation methods
