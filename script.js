@@ -172,7 +172,7 @@ class ArtistManagementHub {
     }
 
     renderUpcomingTasks() {
-        const container = document.getElementById('upcoming-tasks-list');
+        const container = document.getElementById('upcoming-tasks');
         if (!container) return;
         
         const now = new Date();
