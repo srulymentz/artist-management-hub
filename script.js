@@ -607,6 +607,8 @@ class ArtistManagementApp {
         if (window.integrations) {
             window.integrations.renderIntegrations();
         }
+            window.integrations.renderIntegrations();
+        }
     }
 
     // Navigation methods
@@ -620,6 +622,7 @@ class ArtistManagementApp {
         this.renderCalendar();
     }
 
+    // Calendar event management
     addCalendarEvent(date) {
         console.log('Add calendar event for date:', date);
         // TODO: Implement calendar event creation
@@ -659,6 +662,68 @@ class ArtistManagementApp {
             localStorage.setItem('artistManagementData', JSON.stringify(this.data));
         } catch (error) {
             console.error('Error saving data:', error);
+        }
+    }
+
+    saveCalendarEvent(event, date) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const calendarEvent = {
+            id: Date.now().toString(),
+            title: formData.get('title'),
+            date: date,
+            time: formData.get('time'),
+            type: formData.get('type'),
+            description: formData.get('description'),
+            source: 'manual'
+        };
+        
+        this.data.calendarEvents.push(calendarEvent);
+        this.saveData();
+        this.renderCalendar();
+        event.target.closest('.modal-overlay').remove();
+        this.showNotification('Event added successfully!', 'success');
+    }
+
+    syncCalendar() {
+        const btn = document.getElementById('sync-calendar-btn');
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Syncing...';
+            btn.disabled = true;
+        }
+        
+        // Check if Google Calendar is connected
+        if (window.integrations && window.integrations.integrations.googleCalendar.connected) {
+            window.integrations.getCalendarEvents()
+                .then(result => {
+                    if (result.success) {
+                        // Add Google Calendar events to our calendar
+                        result.events.forEach(event => {
+                            const existingEvent = this.data.calendarEvents.find(e => e.id === event.id);
+                            if (!existingEvent) {
+                                this.data.calendarEvents.push(event);
+                            }
+                        });
+                        this.saveData();
+                        this.renderCalendar();
+                        this.showNotification('Calendar synced successfully!', 'success');
+                    }
+                })
+                .catch(error => {
+                    this.showNotification('Calendar sync failed: ' + error.message, 'error');
+                })
+                .finally(() => {
+                    if (btn) {
+                        btn.innerHTML = '<i class="fas fa-sync"></i> Sync Calendar';
+                        btn.disabled = false;
+                    }
+                });
+        } else {
+            this.showNotification('Google Calendar not connected. Go to Settings to connect.', 'info');
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-sync"></i> Sync Calendar';
+                btn.disabled = false;
+            }
         }
     }
 
