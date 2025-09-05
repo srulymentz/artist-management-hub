@@ -265,7 +265,6 @@ class ArtistManagementHub {
                 </div>
                 <div class="artist-details">
                     <p><strong>Genre:</strong> ${artist.genre || 'Not specified'}</p>
-                    <p><strong>Status:</strong> <span class="artist-status ${(artist.status || 'active').toLowerCase()}">${artist.status || 'Active'}</span></p>
                     <p><strong>Monthly Revenue:</strong> $${(artist.monthlyRevenue || 0).toLocaleString()}</p>
                 </div>
                 <div class="artist-stats">
@@ -301,7 +300,6 @@ class ArtistManagementHub {
                             Back to Artists
                         </button>
                         <h2>${artist.name}</h2>
-                        <span class="artist-status ${(artist.status || 'active').toLowerCase()}">${artist.status || 'Active'}</span>
                     </div>
                     <div class="artist-actions">
                         <button onclick="app.editArtist('${artist.id}')" class="btn-outline">
@@ -414,7 +412,6 @@ class ArtistManagementHub {
                 <h3>Artist Details</h3>
                 <div style="background: rgba(102, 126, 234, 0.05); padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
                     <p><strong>Genre:</strong> ${artist.genre || 'Not specified'}</p>
-                    <p><strong>Status:</strong> ${artist.status || 'Active'}</p>
                     <p><strong>Created:</strong> ${new Date(artist.createdAt).toLocaleDateString()}</p>
                     ${artist.notes ? `<p><strong>Notes:</strong> ${artist.notes}</p>` : ''}
                 </div>
