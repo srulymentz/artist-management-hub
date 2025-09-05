@@ -200,9 +200,10 @@ class ArtistManagementApp {
         // Handle OAuth callbacks and ensure integrations are ready
         if (window.integrations) {
             window.integrations.handleOAuthCallback();
-            // Make sure integrations are available globally
-            window.integrations.renderIntegrations();
         }
+        
+        // Ensure integrations are available globally
+        window.integrations = integrations;
     }
 
     setupNavigation() {
@@ -695,8 +696,17 @@ class ArtistManagementApp {
     }
 
     renderSettings() {
-        // Settings are now rendered in HTML, integrations will work via onclick handlers
-        console.log('Settings rendered');
+        console.log('Rendering settings...');
+        
+        // Make sure integrations are rendered
+        if (window.integrations) {
+            // Small delay to ensure DOM is ready
+            setTimeout(() => {
+                window.integrations.renderIntegrations();
+            }, 100);
+        } else {
+            console.error('Integrations not available');
+        }
     }
 
     // Navigation methods

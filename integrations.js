@@ -324,7 +324,12 @@ class IntegrationsManager {
     // Render integrations in settings
     renderIntegrations() {
         const container = document.querySelector('.integration-list');
-        if (!container) return;
+        if (!container) {
+            console.error('Integration container not found');
+            return;
+        }
+        
+        console.log('Rendering integrations...');
 
         container.innerHTML = Object.entries(this.integrations).map(([key, integration]) => `
             <div class="integration-item">
