@@ -251,7 +251,7 @@ class ArtistManagementHub {
             const artistOpportunities = this.data.opportunities.filter(o => o.artistId === artist.id);
             
             return `
-            <div class="artist-card" onclick="app.showArtistDetail('${artist.id}')">
+                <div class="artist-card" onclick="app.showArtistDetail('${artist.id}')">
                 <div class="artist-header">
                     <h3>${artist.name}</h3>
                     <div class="artist-actions">
@@ -282,8 +282,8 @@ class ArtistManagementHub {
                         <div class="artist-stat-label">Opportunities</div>
                     </div>
                 </div>
-            </div>
-        `;
+                </div>
+            `;
         }).join('');
     }
 
