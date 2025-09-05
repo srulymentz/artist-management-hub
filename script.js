@@ -7,6 +7,7 @@ class ArtistManagementHub {
             bookings: [],
             opportunities: [],
             crises: [],
+            tasks: [],
             settings: {
                 autoSave: true,
                 notifications: true,
