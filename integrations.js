@@ -69,27 +69,39 @@ class IntegrationsManager {
     // Notion Integration
     async connectNotion() {
         try {
-            const clientId = prompt('Enter your Notion Integration Token (starts with secret_):');
-            if (!clientId) return;
+            const token = prompt('Enter your Notion Integration Token (starts with secret_):');
+            if (!token) return;
+            
+            if (!token.startsWith('secret_')) {
+                app.showNotification('Invalid token format. Token should start with "secret_"', 'error');
+                return;
+            }
 
             // Test the connection
-            const response = await fetch('https://api.notion.com/v1/users/me', {
+            const response = await fetch('/api/notion/test', {
+                method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${clientId}`,
-                    'Notion-Version': '2022-06-28'
-                }
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ token })
             });
 
+            const result = await response.json();
+            
             if (response.ok) {
                 this.integrations.notion.connected = true;
-                this.integrations.notion.config = { token: clientId };
+                this.integrations.notion.config = { 
+                    token: token,
+                    user: result.user 
+                };
                 this.saveIntegrationStates();
-                app.showNotification('Notion connected successfully!', 'success');
+                app.showNotification(`Notion connected successfully! Welcome ${result.user.name}`, 'success');
                 this.renderIntegrations();
             } else {
-                throw new Error('Invalid token or connection failed');
+                throw new Error(result.error || 'Connection failed');
             }
         } catch (error) {
+            console.error('Notion connection error:', error);
             app.showNotification('Failed to connect to Notion: ' + error.message, 'error');
         }
     }
