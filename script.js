@@ -9,6 +9,7 @@ class ArtistManagementHub {
             crises: [],
             tasks: [],
             calendarEvents: [],
+            expenses: [],
             settings: {
                 autoSave: true,
                 notifications: true,
@@ -27,6 +28,175 @@ class ArtistManagementHub {
         this.updateDashboard();
         this.startAutoSave();
         this.handleOAuthCallbacks();
+        this.initializeAdamSellouk();
+    }
+
+    initializeAdamSellouk() {
+        // Check if Adam Sellouk already exists
+        const adamExists = this.data.artists.find(artist => artist.name === 'Adam Sellouk');
+        if (!adamExists) {
+            // Add Adam Sellouk as an artist
+            const adam = {
+                id: Date.now().toString(),
+                name: 'Adam Sellouk',
+                genre: 'Electronic/House',
+                status: 'established',
+                monthlyRevenue: 35000,
+                email: 'adam@adamsellouk.com',
+                phone: '+1-555-0123',
+                bio: 'Established electronic music artist focusing on house, techno, and melodic techno.',
+                socialMedia: {
+                    instagram: '@adamsellouk',
+                    soundcloud: 'adamsellouk',
+                    spotify: 'Adam Sellouk'
+                },
+                milestones: [
+                    {
+                        title: 'Ultra Europe 2026 Main Stage',
+                        progress: 75,
+                        description: 'Contract negotiations in progress'
+                    }
+                ],
+                bookings: [],
+                expenses: [],
+                createdAt: new Date().toISOString()
+            };
+            
+            this.data.artists.push(adam);
+            
+            // Add travel bookings and expenses
+            this.addAdamTravelData(adam);
+            this.saveData();
+        }
+    }
+
+    addAdamTravelData(adam) {
+        // September 2025 Travel Schedule
+        const travelData = [
+            {
+                date: '2025-09-13',
+                type: 'flight',
+                route: 'TLV-ATH-SAW',
+                confirmation: 'XXASFT / 16PU8S',
+                flightNumbers: 'A 3929 / PC 1192',
+                time: '05:00AM / 11:50AM',
+                airline: 'Aegean / Pegasus',
+                cost: 351.00,
+                description: 'Flight to Istanbul via Athens'
+            },
+            {
+                date: '2025-09-14',
+                type: 'flight',
+                route: 'IST-RMO-TLV',
+                confirmation: 'G89DTG',
+                flightNumbers: '5F 326 / 5F 509',
+                time: '09:30AM / 17:30PM',
+                airline: 'FlyOne',
+                cost: 213.50,
+                description: 'Return flight from Istanbul via Rome'
+            },
+            {
+                date: '2025-09-19',
+                type: 'flight',
+                route: 'TLV-MXP',
+                confirmation: '9A8CIE',
+                flightNumbers: 'NO 4046',
+                time: '04:55AM / 08:05AM',
+                airline: 'Neos',
+                cost: 356.22,
+                description: 'Flight to Milan'
+            },
+            {
+                date: '2025-09-19',
+                type: 'flight',
+                route: 'MXP-IBZ',
+                confirmation: 'KB2HZZ4',
+                flightNumbers: 'EJU 3739',
+                time: '14:20PM / 16:15PM',
+                airline: 'Easy Jet',
+                cost: 254.26,
+                seat: 'Window',
+                description: 'Flight to Ibiza'
+            },
+            {
+                date: '2025-09-19',
+                type: 'show',
+                time: '20:00-21:30',
+                venue: 'Ibiza Show',
+                description: 'Performance in Ibiza'
+            }
+        ];
+
+        // Add bookings to Adam's profile
+        travelData.forEach(item => {
+            if (item.type === 'show') {
+                const booking = {
+                    id: Date.now().toString() + Math.random(),
+                    artistId: adam.id,
+                    artistName: adam.name,
+                    venue: item.venue,
+                    date: item.date,
+                    time: item.time,
+                    status: 'confirmed',
+                    fee: 0, // Fee not specified in data
+                    notes: item.description,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.data.bookings.push(booking);
+                adam.bookings.push(booking.id);
+            }
+        });
+
+        // Add expenses to Adam's profile and global expenses
+        travelData.forEach(item => {
+            if (item.cost) {
+                const expense = {
+                    id: Date.now().toString() + Math.random(),
+                    artistId: adam.id,
+                    artistName: adam.name,
+                    date: item.date,
+                    type: 'travel',
+                    category: item.type,
+                    description: `${item.route} - ${item.airline}`,
+                    amount: item.cost,
+                    confirmation: item.confirmation,
+                    details: {
+                        flightNumbers: item.flightNumbers,
+                        time: item.time,
+                        seat: item.seat || null
+                    },
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.data.expenses.push(expense);
+                adam.expenses.push(expense.id);
+            }
+        });
+
+        // Add calendar events
+        travelData.forEach(item => {
+            const calendarEvent = {
+                id: Date.now().toString() + Math.random(),
+                title: item.type === 'show' ? `${adam.name} - ${item.venue}` : `Flight: ${item.route}`,
+                date: item.date,
+                time: item.time,
+                type: item.type === 'show' ? 'booking' : 'travel',
+                artistId: adam.id,
+                artistName: adam.name,
+                description: item.description,
+                details: {
+                    confirmation: item.confirmation,
+                    flightNumbers: item.flightNumbers,
+                    airline: item.airline,
+                    cost: item.cost,
+                    seat: item.seat
+                },
+                createdAt: new Date().toISOString()
+            };
+            
+            this.data.calendarEvents.push(calendarEvent);
+        });
     }
 
     handleOAuthCallbacks() {
@@ -1268,6 +1438,7 @@ class ArtistManagementHub {
                     crises: [],
                     tasks: [],
                     calendarEvents: [],
+                    expenses: [],
                     settings: {
                         autoSave: true,
                         notifications: true,
