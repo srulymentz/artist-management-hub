@@ -331,6 +331,625 @@ class ArtistManagementApp {
         `;
     }
 
+    // Task Management
+    addTask() {
+        const modalContainer = document.getElementById('modal-container');
+        modalContainer.innerHTML = `
+            <div class="modal-overlay" onclick="this.remove()">
+                <div class="modal" onclick="event.stopPropagation()">
+                    <div class="modal-header">
+                        <h2>Add New Task</h2>
+                        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form onsubmit="app.saveTask(event)">
+                        <div class="form-group">
+                            <label for="task-title">Task Title</label>
+                            <input type="text" id="task-title" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="task-artist">Artist</label>
+                            <select id="task-artist" name="artistId">
+                                <option value="">General Task</option>
+                                ${this.data.artists.map(artist => `
+                                    <option value="${artist.id}">${artist.name}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="task-due">Due Date</label>
+                            <input type="date" id="task-due" name="dueDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="task-priority">Priority</label>
+                            <select id="task-priority" name="priority" required>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="task-description">Description</label>
+                            <textarea id="task-description" name="description"></textarea>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-outline" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Add Task</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+
+    saveTask(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const task = {
+            id: Date.now().toString(),
+            title: formData.get('title'),
+            artistId: formData.get('artistId'),
+            artistName: formData.get('artistId') ? this.data.artists.find(a => a.id === formData.get('artistId'))?.name : 'General',
+            dueDate: formData.get('dueDate'),
+            priority: formData.get('priority'),
+            description: formData.get('description'),
+            completed: false,
+            createdAt: new Date().toISOString()
+        };
+        
+        this.data.tasks.push(task);
+        this.saveData();
+        this.renderUpcomingTasks();
+        event.target.closest('.modal-overlay').remove();
+        this.showNotification('Task added successfully!', 'success');
+    }
+
+    completeTask(taskId) {
+        const taskIndex = this.data.tasks.findIndex(t => t.id === taskId);
+        if (taskIndex !== -1) {
+            this.data.tasks.splice(taskIndex, 1);
+            this.saveData();
+            this.renderUpcomingTasks();
+            this.showNotification('Task completed!', 'success');
+        }
+    }
+
+    // Artist Management
+    addArtist() {
+        const modalContainer = document.getElementById('modal-container');
+        modalContainer.innerHTML = `
+            <div class="modal-overlay" onclick="this.remove()">
+                <div class="modal" onclick="event.stopPropagation()">
+                    <div class="modal-header">
+                        <h2>Add New Artist</h2>
+                        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form onsubmit="app.saveArtist(event)">
+                        <div class="form-group">
+                            <label for="artist-name">Artist Name</label>
+                            <input type="text" id="artist-name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="artist-genre">Genre</label>
+                            <input type="text" id="artist-genre" name="genre" placeholder="e.g., House, Techno, Electronic">
+                        </div>
+                        <div class="form-group">
+                            <label for="artist-email">Email</label>
+                            <input type="email" id="artist-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="artist-phone">Phone</label>
+                            <input type="tel" id="artist-phone" name="phone">
+                        </div>
+                        <div class="form-group">
+                            <label for="artist-status">Status</label>
+                            <select id="artist-status" name="status" required>
+                                <option value="developing">Developing</option>
+                                <option value="established">Established</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="artist-revenue">Monthly Revenue ($)</label>
+                            <input type="number" id="artist-revenue" name="monthlyRevenue" min="0">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-outline" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Add Artist</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+
+    saveArtist(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const artist = {
+            id: Date.now().toString(),
+            name: formData.get('name'),
+            genre: formData.get('genre'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            status: formData.get('status'),
+            monthlyRevenue: parseInt(formData.get('monthlyRevenue')) || 0,
+            milestone: '',
+            progress: 0,
+            nextGoals: '',
+            socialMedia: {}
+        };
+        
+        this.data.artists.push(artist);
+        this.saveData();
+        this.renderArtists();
+        this.renderDashboard();
+        event.target.closest('.modal-overlay').remove();
+        this.showNotification('Artist added successfully!', 'success');
+    }
+
+    editArtist(artistId) {
+        const artist = this.data.artists.find(a => a.id === artistId);
+        if (!artist) return;
+
+        const modalContainer = document.getElementById('modal-container');
+        modalContainer.innerHTML = `
+            <div class="modal-overlay" onclick="this.remove()">
+                <div class="modal" onclick="event.stopPropagation()">
+                    <div class="modal-header">
+                        <h2>Edit Artist</h2>
+                        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form onsubmit="app.updateArtist(event, '${artistId}')">
+                        <div class="form-group">
+                            <label for="artist-name">Artist Name</label>
+                            <input type="text" id="artist-name" name="name" value="${artist.name}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="artist-genre">Genre</label>
+                            <input type="text" id="artist-genre" name="genre" value="${artist.genre}">
+                        </div>
+                        <div class="form-group">
+                            <label for="artist-email">Email</label>
+                            <input type="email" id="artist-email" name="email" value="${artist.email}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="artist-phone">Phone</label>
+                            <input type="tel" id="artist-phone" name="phone" value="${artist.phone}">
+                        </div>
+                        <div class="form-group">
+                            <label for="artist-status">Status</label>
+                            <select id="artist-status" name="status" required>
+                                <option value="developing" ${artist.status === 'developing' ? 'selected' : ''}>Developing</option>
+                                <option value="established" ${artist.status === 'established' ? 'selected' : ''}>Established</option>
+                                <option value="inactive" ${artist.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="artist-revenue">Monthly Revenue ($)</label>
+                            <input type="number" id="artist-revenue" name="monthlyRevenue" value="${artist.monthlyRevenue || 0}" min="0">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-outline" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Update Artist</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+
+    updateArtist(event, artistId) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const artistIndex = this.data.artists.findIndex(a => a.id === artistId);
+        
+        if (artistIndex !== -1) {
+            this.data.artists[artistIndex] = {
+                ...this.data.artists[artistIndex],
+                name: formData.get('name'),
+                genre: formData.get('genre'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                status: formData.get('status'),
+                monthlyRevenue: parseInt(formData.get('monthlyRevenue')) || 0
+            };
+            
+            this.saveData();
+            this.renderArtists();
+            this.renderDashboard();
+            event.target.closest('.modal-overlay').remove();
+            this.showNotification('Artist updated successfully!', 'success');
+        }
+    }
+
+    deleteArtist(artistId) {
+        if (confirm('Are you sure you want to delete this artist? This will also delete all their bookings and tasks.')) {
+            this.data.artists = this.data.artists.filter(a => a.id !== artistId);
+            this.data.bookings = this.data.bookings.filter(b => b.artistId !== artistId);
+            this.data.tasks = this.data.tasks.filter(t => t.artistId !== artistId);
+            this.data.opportunities = this.data.opportunities.filter(o => o.artistId !== artistId);
+            
+            this.saveData();
+            this.renderArtists();
+            this.renderDashboard();
+            this.renderBookings();
+            this.showNotification('Artist deleted successfully!', 'success');
+        }
+    }
+
+    // Booking Management
+    addBooking() {
+        const modalContainer = document.getElementById('modal-container');
+        modalContainer.innerHTML = `
+            <div class="modal-overlay" onclick="this.remove()">
+                <div class="modal" onclick="event.stopPropagation()">
+                    <div class="modal-header">
+                        <h2>Add New Booking</h2>
+                        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form onsubmit="app.saveBooking(event)">
+                        <div class="form-group">
+                            <label for="booking-artist">Artist</label>
+                            <select id="booking-artist" name="artistId" required>
+                                <option value="">Select Artist</option>
+                                ${this.data.artists.map(artist => `
+                                    <option value="${artist.id}">${artist.name}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-venue">Venue/Event</label>
+                            <input type="text" id="booking-venue" name="venue" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-date">Date</label>
+                            <input type="date" id="booking-date" name="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-time">Time</label>
+                            <input type="time" id="booking-time" name="time" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-fee">Fee ($)</label>
+                            <input type="number" id="booking-fee" name="fee" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-status">Status</label>
+                            <select id="booking-status" name="status" required>
+                                <option value="pending">Pending</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-type">Type</label>
+                            <select id="booking-type" name="type" required>
+                                <option value="performance">Performance</option>
+                                <option value="travel">Travel</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-details">Details</label>
+                            <textarea id="booking-details" name="details"></textarea>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-outline" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Add Booking</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+
+    saveBooking(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const artist = this.data.artists.find(a => a.id === formData.get('artistId'));
+        
+        const booking = {
+            id: Date.now().toString(),
+            artistId: formData.get('artistId'),
+            artistName: artist ? artist.name : 'Unknown',
+            venue: formData.get('venue'),
+            date: formData.get('date'),
+            time: formData.get('time'),
+            fee: parseInt(formData.get('fee')),
+            status: formData.get('status'),
+            type: formData.get('type'),
+            details: formData.get('details')
+        };
+        
+        this.data.bookings.push(booking);
+        this.syncBookingsToCalendar();
+        this.saveData();
+        this.renderBookings();
+        this.renderDashboard();
+        this.renderCalendar();
+        event.target.closest('.modal-overlay').remove();
+        this.showNotification('Booking added successfully!', 'success');
+    }
+
+    editBooking(bookingId) {
+        const booking = this.data.bookings.find(b => b.id === bookingId);
+        if (!booking) return;
+
+        const modalContainer = document.getElementById('modal-container');
+        modalContainer.innerHTML = `
+            <div class="modal-overlay" onclick="this.remove()">
+                <div class="modal" onclick="event.stopPropagation()">
+                    <div class="modal-header">
+                        <h2>Edit Booking</h2>
+                        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form onsubmit="app.updateBooking(event, '${bookingId}')">
+                        <div class="form-group">
+                            <label for="booking-artist">Artist</label>
+                            <select id="booking-artist" name="artistId" required>
+                                ${this.data.artists.map(artist => `
+                                    <option value="${artist.id}" ${artist.id === booking.artistId ? 'selected' : ''}>${artist.name}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-venue">Venue/Event</label>
+                            <input type="text" id="booking-venue" name="venue" value="${booking.venue}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-date">Date</label>
+                            <input type="date" id="booking-date" name="date" value="${booking.date}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-time">Time</label>
+                            <input type="time" id="booking-time" name="time" value="${booking.time}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-fee">Fee ($)</label>
+                            <input type="number" id="booking-fee" name="fee" value="${booking.fee}" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-status">Status</label>
+                            <select id="booking-status" name="status" required>
+                                <option value="pending" ${booking.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                <option value="confirmed" ${booking.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                                <option value="cancelled" ${booking.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-type">Type</label>
+                            <select id="booking-type" name="type" required>
+                                <option value="performance" ${booking.type === 'performance' ? 'selected' : ''}>Performance</option>
+                                <option value="travel" ${booking.type === 'travel' ? 'selected' : ''}>Travel</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-details">Details</label>
+                            <textarea id="booking-details" name="details">${booking.details}</textarea>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-outline" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Update Booking</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+
+    updateBooking(event, bookingId) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const bookingIndex = this.data.bookings.findIndex(b => b.id === bookingId);
+        const artist = this.data.artists.find(a => a.id === formData.get('artistId'));
+        
+        if (bookingIndex !== -1) {
+            this.data.bookings[bookingIndex] = {
+                ...this.data.bookings[bookingIndex],
+                artistId: formData.get('artistId'),
+                artistName: artist ? artist.name : 'Unknown',
+                venue: formData.get('venue'),
+                date: formData.get('date'),
+                time: formData.get('time'),
+                fee: parseInt(formData.get('fee')),
+                status: formData.get('status'),
+                type: formData.get('type'),
+                details: formData.get('details')
+            };
+            
+            this.syncBookingsToCalendar();
+            this.saveData();
+            this.renderBookings();
+            this.renderDashboard();
+            this.renderCalendar();
+            event.target.closest('.modal-overlay').remove();
+            this.showNotification('Booking updated successfully!', 'success');
+        }
+    }
+
+    deleteBooking(bookingId) {
+        if (confirm('Are you sure you want to delete this booking?')) {
+            this.data.bookings = this.data.bookings.filter(b => b.id !== bookingId);
+            this.syncBookingsToCalendar();
+            this.saveData();
+            this.renderBookings();
+            this.renderDashboard();
+            this.renderCalendar();
+            this.showNotification('Booking deleted successfully!', 'success');
+        }
+    }
+
+    // Opportunity Management
+    addOpportunity() {
+        const modalContainer = document.getElementById('modal-container');
+        modalContainer.innerHTML = `
+            <div class="modal-overlay" onclick="this.remove()">
+                <div class="modal" onclick="event.stopPropagation()">
+                    <div class="modal-header">
+                        <h2>Add New Opportunity</h2>
+                        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form onsubmit="app.saveOpportunity(event)">
+                        <div class="form-group">
+                            <label for="opp-title">Opportunity Title</label>
+                            <input type="text" id="opp-title" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="opp-artist">Artist</label>
+                            <select id="opp-artist" name="artistId">
+                                <option value="">General Opportunity</option>
+                                ${this.data.artists.map(artist => `
+                                    <option value="${artist.id}">${artist.name}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="opp-type">Type</label>
+                            <select id="opp-type" name="type" required>
+                                <option value="brand-partnership">Brand Partnership</option>
+                                <option value="collaboration">Collaboration</option>
+                                <option value="remix">Remix</option>
+                                <option value="label">Label Deal</option>
+                                <option value="festival">Festival</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="opp-description">Description</label>
+                            <textarea id="opp-description" name="description" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="opp-deadline">Deadline</label>
+                            <input type="date" id="opp-deadline" name="deadline">
+                        </div>
+                        <div class="form-group">
+                            <label for="opp-value">Potential Value ($)</label>
+                            <input type="number" id="opp-value" name="value" min="0">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-outline" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                            <button type="submit" class="btn-primary">Add Opportunity</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+
+    saveOpportunity(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const artist = this.data.artists.find(a => a.id === formData.get('artistId'));
+        
+        const opportunity = {
+            id: Date.now().toString(),
+            title: formData.get('title'),
+            artistId: formData.get('artistId'),
+            artistName: artist ? artist.name : 'General',
+            type: formData.get('type'),
+            description: formData.get('description'),
+            deadline: formData.get('deadline'),
+            value: parseInt(formData.get('value')) || 0,
+            status: 'open',
+            createdAt: new Date().toISOString()
+        };
+        
+        this.data.opportunities.push(opportunity);
+        this.saveData();
+        this.renderOpportunities();
+        this.renderDashboard();
+        event.target.closest('.modal-overlay').remove();
+        this.showNotification('Opportunity added successfully!', 'success');
+    }
+
+    // Crisis Management
+    addCrisis() {
+        const modalContainer = document.getElementById('modal-container');
+        modalContainer.innerHTML = `
+            <div class="modal-overlay" onclick="this.remove()">
+                <div class="modal" onclick="event.stopPropagation()">
+                    <div class="modal-header">
+                        <h2>Report Crisis</h2>
+                        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form onsubmit="app.saveCrisis(event)">
+                        <div class="form-group">
+                            <label for="crisis-title">Crisis Title</label>
+                            <input type="text" id="crisis-title" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="crisis-artist">Affected Artist</label>
+                            <select id="crisis-artist" name="artistId">
+                                <option value="">General Crisis</option>
+                                ${this.data.artists.map(artist => `
+                                    <option value="${artist.id}">${artist.name}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="crisis-severity">Severity</label>
+                            <select id="crisis-severity" name="severity" required>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="crisis-description">Description</label>
+                            <textarea id="crisis-description" name="description" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="crisis-actions">Immediate Actions Needed</label>
+                            <textarea id="crisis-actions" name="actions"></textarea>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-outline" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                            <button type="submit" class="btn-danger">Report Crisis</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+
+    saveCrisis(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const artist = this.data.artists.find(a => a.id === formData.get('artistId'));
+        
+        const crisis = {
+            id: Date.now().toString(),
+            title: formData.get('title'),
+            artistId: formData.get('artistId'),
+            artistName: artist ? artist.name : 'General',
+            severity: formData.get('severity'),
+            description: formData.get('description'),
+            actions: formData.get('actions'),
+            status: 'active',
+            createdAt: new Date().toISOString()
+        };
+        
+        this.data.crises.push(crisis);
+        this.saveData();
+        this.renderCrisis();
+        event.target.closest('.modal-overlay').remove();
+        this.showNotification('Crisis reported successfully!', 'error');
+    }
+
     renderArtists() {
         const container = document.getElementById('artists-grid');
         
@@ -847,23 +1466,33 @@ class ArtistManagementApp {
 
 // Global functions for HTML onclick handlers
 function addArtist() {
-    console.log('Add artist clicked');
+    if (window.app) {
+        window.app.addArtist();
+    }
 }
 
 function addBooking() {
-    console.log('Add booking clicked');
+    if (window.app) {
+        window.app.addBooking();
+    }
 }
 
 function addOpportunity() {
-    console.log('Add opportunity clicked');
+    if (window.app) {
+        window.app.addOpportunity();
+    }
 }
 
 function addCrisis() {
-    console.log('Add crisis clicked');
+    if (window.app) {
+        window.app.addCrisis();
+    }
 }
 
 function addTask() {
-    console.log('Add task clicked');
+    if (window.app) {
+        window.app.addTask();
+    }
 }
 
 function exportData() {

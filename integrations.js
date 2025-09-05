@@ -325,13 +325,25 @@ class IntegrationsManager {
     renderIntegrations() {
         const container = document.querySelector('.integration-list');
         if (!container) {
-            console.error('Integration container not found');
+            console.error('Integration container not found - looking for .integration-list');
+            // Try alternative selectors
+            const altContainer = document.getElementById('integration-list') || 
+                                document.querySelector('#settings .integration-list') ||
+                                document.querySelector('.settings-card .integration-list');
+            if (altContainer) {
+                console.log('Found alternative container');
+                this.renderToContainer(altContainer);
+            }
             return;
         }
         
-        console.log('Rendering integrations...');
+        this.renderToContainer(container);
+    }
 
-        container.innerHTML = Object.entries(this.integrations).map(([key, integration]) => `
+    renderToContainer(container) {
+        console.log('Rendering integrations to container...');
+        
+        const html = Object.entries(this.integrations).map(([key, integration]) => `
             <div class="integration-item">
                 <div class="integration-info">
                     <i class="${integration.icon}"></i>
@@ -349,6 +361,9 @@ class IntegrationsManager {
                 </div>
             </div>
         `).join('');
+        
+        container.innerHTML = html;
+        console.log('Integrations rendered successfully');
     }
 
     // Generic connect/disconnect methods
