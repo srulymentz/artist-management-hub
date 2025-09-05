@@ -245,26 +245,293 @@ class ArtistManagementHub {
             return;
         }
 
-        container.innerHTML = this.data.artists.map(artist => `
-            <div class="artist-card">
+        container.innerHTML = this.data.artists.map(artist => {
+            const artistBookings = this.data.bookings.filter(b => b.artistId === artist.id);
+            const artistTasks = this.data.tasks.filter(t => t.artistId === artist.id && !t.completed);
+            const artistOpportunities = this.data.opportunities.filter(o => o.artistId === artist.id);
+            
+            return `
+            <div class="artist-card" onclick="app.showArtistDetail('${artist.id}')">
                 <div class="artist-header">
                     <h3>${artist.name}</h3>
                     <div class="artist-actions">
-                        <button onclick="app.editArtist('${artist.id}')" class="btn-outline">
+                        <button onclick="event.stopPropagation(); app.editArtist('${artist.id}')" class="btn-outline">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button onclick="app.deleteArtist('${artist.id}')" class="btn-danger">
+                        <button onclick="event.stopPropagation(); app.deleteArtist('${artist.id}')" class="btn-danger">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
                 </div>
                 <div class="artist-details">
                     <p><strong>Genre:</strong> ${artist.genre || 'Not specified'}</p>
-                    <p><strong>Status:</strong> ${artist.status || 'Active'}</p>
+                    <p><strong>Status:</strong> <span class="artist-status ${(artist.status || 'active').toLowerCase()}">${artist.status || 'Active'}</span></p>
                     <p><strong>Monthly Revenue:</strong> $${(artist.monthlyRevenue || 0).toLocaleString()}</p>
                 </div>
+                <div class="artist-stats">
+                    <div class="artist-stat">
+                        <div class="artist-stat-number">${artistBookings.length}</div>
+                        <div class="artist-stat-label">Bookings</div>
+                    </div>
+                    <div class="artist-stat">
+                        <div class="artist-stat-number">${artistTasks.length}</div>
+                        <div class="artist-stat-label">Tasks</div>
+                    </div>
+                    <div class="artist-stat">
+                        <div class="artist-stat-number">${artistOpportunities.length}</div>
+                        <div class="artist-stat-label">Opportunities</div>
+                    </div>
+                </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
+    }
+
+    showArtistDetail(artistId) {
+        const artist = this.data.artists.find(a => a.id === artistId);
+        if (!artist) return;
+
+        const container = document.getElementById('artists-grid');
+        container.innerHTML = `
+            <div class="artist-detail-view">
+                <div class="artist-detail-header">
+                    <div class="artist-detail-title">
+                        <button onclick="app.renderArtists()" class="btn-outline">
+                            <i class="fas fa-arrow-left"></i>
+                            Back to Artists
+                        </button>
+                        <h2>${artist.name}</h2>
+                        <span class="artist-status ${(artist.status || 'active').toLowerCase()}">${artist.status || 'Active'}</span>
+                    </div>
+                    <div class="artist-actions">
+                        <button onclick="app.editArtist('${artist.id}')" class="btn-outline">
+                            <i class="fas fa-edit"></i>
+                            Edit Artist
+                        </button>
+                    </div>
+                </div>
+
+                <div class="artist-detail-tabs">
+                    <button class="artist-tab active" onclick="app.showArtistTab('overview')">
+                        <i class="fas fa-chart-line"></i>
+                        Overview
+                    </button>
+                    <button class="artist-tab" onclick="app.showArtistTab('bookings')">
+                        <i class="fas fa-calendar-alt"></i>
+                        Bookings
+                    </button>
+                    <button class="artist-tab" onclick="app.showArtistTab('tasks')">
+                        <i class="fas fa-tasks"></i>
+                        Tasks
+                    </button>
+                    <button class="artist-tab" onclick="app.showArtistTab('opportunities')">
+                        <i class="fas fa-lightbulb"></i>
+                        Opportunities
+                    </button>
+                </div>
+
+                <div id="artist-tab-overview" class="artist-tab-content active">
+                    ${this.renderArtistOverview(artist)}
+                </div>
+                <div id="artist-tab-bookings" class="artist-tab-content">
+                    ${this.renderArtistBookings(artist)}
+                </div>
+                <div id="artist-tab-tasks" class="artist-tab-content">
+                    ${this.renderArtistTasks(artist)}
+                </div>
+                <div id="artist-tab-opportunities" class="artist-tab-content">
+                    ${this.renderArtistOpportunities(artist)}
+                </div>
+            </div>
+        `;
+    }
+
+    showArtistTab(tabName) {
+        // Update tab buttons
+        document.querySelectorAll('.artist-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelector(`[onclick="app.showArtistTab('${tabName}')"]`).classList.add('active');
+
+        // Update tab content
+        document.querySelectorAll('.artist-tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        document.getElementById(`artist-tab-${tabName}`).classList.add('active');
+    }
+
+    renderArtistOverview(artist) {
+        const artistBookings = this.data.bookings.filter(b => b.artistId === artist.id);
+        const artistTasks = this.data.tasks.filter(t => t.artistId === artist.id);
+        const artistOpportunities = this.data.opportunities.filter(o => o.artistId === artist.id);
+        const completedTasks = artistTasks.filter(t => t.completed);
+        const pendingTasks = artistTasks.filter(t => !t.completed);
+
+        return `
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Total Bookings</h3>
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="stat-number">${artistBookings.length}</div>
+                        <div class="stat-label">All Time</div>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Active Tasks</h3>
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="stat-number">${pendingTasks.length}</div>
+                        <div class="stat-label">Pending</div>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Opportunities</h3>
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="stat-number">${artistOpportunities.length}</div>
+                        <div class="stat-label">Open</div>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Monthly Revenue</h3>
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="stat-number">$${(artist.monthlyRevenue || 0).toLocaleString()}</div>
+                        <div class="stat-label">Current</div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 2rem;">
+                <h3>Artist Details</h3>
+                <div style="background: rgba(102, 126, 234, 0.05); padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
+                    <p><strong>Genre:</strong> ${artist.genre || 'Not specified'}</p>
+                    <p><strong>Status:</strong> ${artist.status || 'Active'}</p>
+                    <p><strong>Created:</strong> ${new Date(artist.createdAt).toLocaleDateString()}</p>
+                    ${artist.notes ? `<p><strong>Notes:</strong> ${artist.notes}</p>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    renderArtistBookings(artist) {
+        const artistBookings = this.data.bookings.filter(b => b.artistId === artist.id);
+        
+        if (artistBookings.length === 0) {
+            return `
+                <div class="empty-state">
+                    <i class="fas fa-calendar-plus"></i>
+                    <p>No bookings for ${artist.name} yet</p>
+                    <button class="btn-secondary" onclick="addBooking('${artist.id}')">Add First Booking</button>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="artist-items-list">
+                ${artistBookings.map(booking => `
+                    <div class="artist-item">
+                        <h4>${booking.title}</h4>
+                        <p><strong>Date:</strong> ${new Date(booking.date).toLocaleDateString()}</p>
+                        <p><strong>Venue:</strong> ${booking.venue}</p>
+                        <p><strong>Fee:</strong> $${booking.fee?.toLocaleString() || 'TBD'}</p>
+                        <p><strong>Status:</strong> ${booking.status}</p>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    renderArtistTasks(artist) {
+        const artistTasks = this.data.tasks.filter(t => t.artistId === artist.id);
+        
+        if (artistTasks.length === 0) {
+            return `
+                <div class="empty-state">
+                    <i class="fas fa-tasks"></i>
+                    <p>No tasks for ${artist.name} yet</p>
+                    <button class="btn-secondary" onclick="addTask('${artist.id}')">Add First Task</button>
+                </div>
+            `;
+        }
+
+        const pendingTasks = artistTasks.filter(t => !t.completed);
+        const completedTasks = artistTasks.filter(t => t.completed);
+
+        return `
+            <div style="margin-bottom: 2rem;">
+                <h4>Pending Tasks (${pendingTasks.length})</h4>
+                <div class="artist-items-list">
+                    ${pendingTasks.length === 0 ? '<p style="color: #666; font-style: italic;">No pending tasks</p>' : 
+                        pendingTasks.map(task => `
+                            <div class="artist-item priority-${task.priority}">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div>
+                                        <h4>${task.title}</h4>
+                                        ${task.description ? `<p>${task.description}</p>` : ''}
+                                        <p><strong>Due:</strong> ${new Date(task.dueDate).toLocaleDateString()}</p>
+                                        <p><strong>Priority:</strong> ${task.priority}</p>
+                                    </div>
+                                    <button onclick="completeTask('${task.id}')" class="task-complete">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+            </div>
+            ${completedTasks.length > 0 ? `
+                <div>
+                    <h4>Completed Tasks (${completedTasks.length})</h4>
+                    <div class="artist-items-list">
+                        ${completedTasks.map(task => `
+                            <div class="artist-item" style="opacity: 0.6;">
+                                <h4>${task.title} <i class="fas fa-check-circle" style="color: #27ae60;"></i></h4>
+                                ${task.description ? `<p>${task.description}</p>` : ''}
+                                <p><strong>Completed:</strong> ${new Date(task.completedAt).toLocaleDateString()}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+        `;
+    }
+
+    renderArtistOpportunities(artist) {
+        const artistOpportunities = this.data.opportunities.filter(o => o.artistId === artist.id);
+        
+        if (artistOpportunities.length === 0) {
+            return `
+                <div class="empty-state">
+                    <i class="fas fa-lightbulb"></i>
+                    <p>No opportunities for ${artist.name} yet</p>
+                    <button class="btn-secondary" onclick="addOpportunity('${artist.id}')">Add First Opportunity</button>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="artist-items-list">
+                ${artistOpportunities.map(opportunity => `
+                    <div class="artist-item">
+                        <h4>${opportunity.title}</h4>
+                        <p>${opportunity.description}</p>
+                        <p><strong>Type:</strong> ${opportunity.type}</p>
+                        <p><strong>Status:</strong> ${opportunity.status}</p>
+                        <p><strong>Deadline:</strong> ${new Date(opportunity.deadline).toLocaleDateString()}</p>
+                    </div>
+                `).join('')}
+            </div>
+        `;
     }
 
     addArtist() {
