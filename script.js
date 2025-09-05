@@ -349,7 +349,7 @@ class ArtistManagementHub {
         const modalContainer = document.getElementById('modal-container');
         
         const actionsHtml = actions.map(action => 
-            `<button class="${action.class}" onclick="${action.action === 'close' ? 'app.closeModal()' : 'action.action()'}">${action.text}</button>`
+            `<button class="${action.class}" onclick="${action.action === 'close' ? 'app.closeModal()' : 'app.executeModalAction(' + actions.indexOf(action) + ')'}">${action.text}</button>`
         ).join('');
 
         modalContainer.innerHTML = `
@@ -373,6 +373,13 @@ class ArtistManagementHub {
 
         // Store action functions for later execution
         this.modalActions = actions;
+    }
+
+    executeModalAction(index) {
+        const action = this.modalActions[index];
+        if (action && typeof action.action === 'function') {
+            action.action();
+        }
     }
 
     closeModal() {
