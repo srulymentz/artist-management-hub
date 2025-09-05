@@ -363,6 +363,86 @@ class ArtistManagementHub {
         this.showNotification('Crisis management coming soon!', 'info');
     }
 
+    // Task Management
+    addTask() {
+        this.showModal('Add Task', `
+            <form id="task-form">
+                <div class="form-group">
+                    <label for="task-title">Task Title *</label>
+                    <input type="text" id="task-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="task-description">Description</label>
+                    <textarea id="task-description" placeholder="Task details..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="task-artist">Artist</label>
+                    <select id="task-artist">
+                        <option value="">General Task</option>
+                        ${this.data.artists.map(artist => 
+                            `<option value="${artist.id}">${artist.name}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="task-due-date">Due Date *</label>
+                    <input type="date" id="task-due-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="task-priority">Priority</label>
+                    <select id="task-priority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+            </form>
+        `, [
+            { text: 'Cancel', class: 'btn-secondary', action: 'close' },
+            { text: 'Add Task', class: 'btn-primary', action: () => this.saveTask() }
+        ]);
+    }
+
+    saveTask() {
+        const task = {
+            id: Date.now().toString(),
+            title: document.getElementById('task-title').value,
+            description: document.getElementById('task-description').value,
+            artistId: document.getElementById('task-artist').value,
+            dueDate: document.getElementById('task-due-date').value,
+            priority: document.getElementById('task-priority').value,
+            completed: false,
+            createdAt: new Date().toISOString()
+        };
+
+        if (!task.title.trim()) {
+            this.showNotification('Task title is required', 'error');
+            return;
+        }
+
+        if (!task.dueDate) {
+            this.showNotification('Due date is required', 'error');
+            return;
+        }
+
+        this.data.tasks.push(task);
+        this.saveData();
+        this.closeModal();
+        this.updateDashboard();
+        this.showNotification('Task added successfully', 'success');
+    }
+
+    completeTask(id) {
+        const task = this.data.tasks.find(t => t.id === id);
+        if (task) {
+            task.completed = true;
+            task.completedAt = new Date().toISOString();
+            this.saveData();
+            this.updateDashboard();
+            this.showNotification('Task completed!', 'success');
+        }
+    }
+
     // Modal Management
     showModal(title, content, actions = []) {
         const modalContainer = document.getElementById('modal-container');
