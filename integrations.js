@@ -276,11 +276,11 @@ class IntegrationsManager {
                 </div>
                 <div class="integration-actions">
                     ${integration.connected ? 
-                        `<button class="btn-outline" onclick="integrations.disconnect('${key}')">Disconnect</button>` :
-                        `<button class="btn-primary" onclick="integrations.connect('${key}')">Connect</button>`
+                        `<button class="btn-outline" onclick="window.integrations.disconnect('${key}')">Disconnect</button>` :
+                        `<button class="btn-primary" onclick="window.integrations.connect('${key}')">Connect</button>`
                     }
                     ${integration.connected ? 
-                        `<button class="btn-secondary" onclick="integrations.test('${key}')">Test</button>` : ''
+                        `<button class="btn-secondary" onclick="window.integrations.test('${key}')">Test</button>` : ''
                     }
                 </div>
             </div>
@@ -301,6 +301,8 @@ class IntegrationsManager {
             case 'gmail':
                 this.connectGoogleService(service);
                 break;
+            default:
+                app.showNotification(`Connection for ${service} not implemented yet`, 'info');
         }
     }
 

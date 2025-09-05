@@ -529,6 +529,9 @@ class ArtistManagementHub {
 // Initialize the application
 const app = new ArtistManagementHub();
 
+// Make integrations available globally for onclick handlers
+window.integrations = integrations;
+
 // Global functions for HTML onclick handlers
 window.addArtist = () => app.addArtist();
 window.addBooking = () => app.addBooking();
