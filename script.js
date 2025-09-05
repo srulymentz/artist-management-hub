@@ -470,6 +470,11 @@ class ArtistManagementApp {
         this.renderCalendar();
     }
 
+    addCalendarEvent(date) {
+        console.log('Add calendar event for date:', date);
+        // TODO: Implement calendar event creation
+    }
+
     // Data management
     loadData() {
         try {
