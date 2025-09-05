@@ -267,10 +267,35 @@ class ArtistManagementApp {
 
     renderBookings() {
         const container = document.getElementById('bookings-list');
-        console.log('Rendering bookings, data:', this.data.bookings);
+        console.log('=== BOOKINGS DEBUG ===');
+        console.log('Container found:', !!container);
+        console.log('Bookings data:', this.data.bookings);
+        console.log('Bookings length:', this.data.bookings.length);
+        
+        if (!container) {
+            console.log('ERROR: bookings-list container not found!');
+            return;
+        }
+        
+        // Force show bookings even if array is empty for testing
+        container.innerHTML = `
+            <div style="background: white; padding: 20px; border-radius: 8px;">
+                <h3>Bookings Debug Info:</h3>
+                <p>Bookings count: ${this.data.bookings.length}</p>
+                <p>Data: ${JSON.stringify(this.data.bookings, null, 2)}</p>
+                
+                <div style="margin-top: 20px;">
+                    <h4>Test Booking Display:</h4>
+                    <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
+                        <strong>Adam Sellouk</strong> - Flight TLV-ATH-SAW<br>
+                        Date: Sept 13, 2025 | Fee: $351.00<br>
+                        Status: Confirmed | Type: Travel
+                    </div>
+                </div>
+            </div>
+        `;
         
         if (this.data.bookings.length === 0) {
-            console.log('No bookings found');
             container.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-calendar-plus"></i>
@@ -281,7 +306,6 @@ class ArtistManagementApp {
             return;
         }
 
-        console.log('Rendering', this.data.bookings.length, 'bookings');
         container.innerHTML = `
             <div class="bookings-table">
                 <div class="bookings-header">
