@@ -3,9 +3,29 @@ class ArtistManagementApp {
     constructor() {
         console.log('App starting...');
         this.data = {
+            artists: [
+                {
+                    id: 'adam-sellouk',
+                    name: 'Adam Sellouk',
+                    genre: 'Electronic, House, Techno',
+                    status: 'established',
+                    email: 'adam@adamsellouk.com',
+                    phone: '+1-555-0123',
+                    monthlyRevenue: 35000,
+                    milestone: 'Ultra Europe 2026 main stage',
+                    progress: 75,
+                    nextGoals: 'Major festival circuit expansion',
+                    socialMedia: {
+                        instagram: '@adamsellouk',
+                        soundcloud: 'adamsellouk',
+                        spotify: 'Adam Sellouk'
+                    }
+                }
+            ],
             bookings: [
                 {
                     id: 'booking1',
+                    artistId: 'adam-sellouk',
                     artistName: 'Adam Sellouk',
                     venue: 'Flight TLV-ATH-SAW',
                     date: '2025-09-13',
@@ -17,6 +37,7 @@ class ArtistManagementApp {
                 },
                 {
                     id: 'booking2',
+                    artistId: 'adam-sellouk',
                     artistName: 'Adam Sellouk',
                     venue: 'Flight IST-RMO-TLV',
                     date: '2025-09-14',
@@ -28,6 +49,7 @@ class ArtistManagementApp {
                 },
                 {
                     id: 'booking3',
+                    artistId: 'adam-sellouk',
                     artistName: 'Adam Sellouk',
                     venue: 'Flight TLV-MXP',
                     date: '2025-09-19',
@@ -39,6 +61,7 @@ class ArtistManagementApp {
                 },
                 {
                     id: 'booking4',
+                    artistId: 'adam-sellouk',
                     artistName: 'Adam Sellouk',
                     venue: 'Flight MXP-IBZ',
                     date: '2025-09-19',
@@ -50,6 +73,7 @@ class ArtistManagementApp {
                 },
                 {
                     id: 'booking5',
+                    artistId: 'adam-sellouk',
                     artistName: 'Adam Sellouk',
                     venue: 'Ibiza Show',
                     date: '2025-09-19',
@@ -60,7 +84,6 @@ class ArtistManagementApp {
                     details: 'Performance: 20:00-21:30'
                 }
             ],
-            artists: [],
             opportunities: [],
             crises: [],
             tasks: [],
