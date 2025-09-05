@@ -577,6 +577,52 @@ class ArtistManagementHub {
         ]);
     }
 
+    editArtist(id) {
+        const artist = this.data.artists.find(a => a.id === id);
+        if (!artist) return;
+
+        this.showModal('Edit Artist', `
+            <form id="artist-form">
+                <div class="form-group">
+                    <label for="artist-name">Artist Name *</label>
+                    <input type="text" id="artist-name" value="${artist.name}" required>
+                </div>
+                <div class="form-group">
+                    <label for="artist-genre">Genre</label>
+                    <select id="artist-genre">
+                        <option value="">Select Genre</option>
+                        <option value="House" ${artist.genre === 'House' ? 'selected' : ''}>House</option>
+                        <option value="Techno" ${artist.genre === 'Techno' ? 'selected' : ''}>Techno</option>
+                        <option value="Tech House" ${artist.genre === 'Tech House' ? 'selected' : ''}>Tech House</option>
+                        <option value="Melodic Techno" ${artist.genre === 'Melodic Techno' ? 'selected' : ''}>Melodic Techno</option>
+                        <option value="Groovy House" ${artist.genre === 'Groovy House' ? 'selected' : ''}>Groovy House</option>
+                        <option value="Funk" ${artist.genre === 'Funk' ? 'selected' : ''}>Funk</option>
+                        <option value="Other" ${artist.genre === 'Other' ? 'selected' : ''}>Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="artist-status">Status</label>
+                    <select id="artist-status">
+                        <option value="Developing" ${artist.status === 'Developing' ? 'selected' : ''}>Developing</option>
+                        <option value="Established" ${artist.status === 'Established' ? 'selected' : ''}>Established</option>
+                        <option value="Inactive" ${artist.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="artist-revenue">Monthly Revenue ($)</label>
+                    <input type="number" id="artist-revenue" value="${artist.monthlyRevenue || 0}" min="0" step="100">
+                </div>
+                <div class="form-group">
+                    <label for="artist-notes">Notes</label>
+                    <textarea id="artist-notes" placeholder="Additional notes about this artist...">${artist.notes || ''}</textarea>
+                </div>
+            </form>
+        `, [
+            { text: 'Cancel', class: 'btn-secondary', action: 'close' },
+            { text: 'Update Artist', class: 'btn-primary', action: () => this.saveArtist(id) }
+        ]);
+    }
+
     saveArtist(editId = null) {
         const form = document.getElementById('artist-form');
         const formData = new FormData(form);
