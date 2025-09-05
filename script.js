@@ -8,12 +8,15 @@ class ArtistManagementHub {
             opportunities: [],
             crises: [],
             tasks: [],
+            calendarEvents: [],
             settings: {
                 autoSave: true,
                 notifications: true,
                 theme: 'default'
             }
         };
+        
+        this.currentCalendarDate = new Date();
         
         this.init();
     }
@@ -121,6 +124,9 @@ class ArtistManagementHub {
                 break;
             case 'crisis':
                 this.renderCrises();
+                break;
+            case 'calendar':
+                this.renderCalendar();
                 break;
             case 'settings':
                 this.renderSettings();
@@ -730,6 +736,353 @@ class ArtistManagementHub {
         this.showNotification('Crisis management coming soon!', 'info');
     }
 
+    // Calendar Management
+    renderCalendar() {
+        this.updateCalendarView();
+        this.renderUpcomingCalendarEvents();
+    }
+
+    updateCalendarView() {
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        
+        const monthYearElement = document.getElementById('calendar-month-year');
+        const calendarGrid = document.getElementById('calendar-grid');
+        
+        if (!monthYearElement || !calendarGrid) return;
+        
+        const year = this.currentCalendarDate.getFullYear();
+        const month = this.currentCalendarDate.getMonth();
+        
+        monthYearElement.textContent = `${monthNames[month]} ${year}`;
+        
+        // Get first day of month and number of days
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDayOfWeek = firstDay.getDay();
+        
+        // Get events for this month
+        const monthEvents = this.getEventsForMonth(year, month);
+        
+        let calendarHTML = '';
+        
+        // Add day headers
+        dayNames.forEach(day => {
+            calendarHTML += `<div class="calendar-day-header">${day}</div>`;
+        });
+        
+        // Add empty cells for days before month starts
+        for (let i = 0; i < startingDayOfWeek; i++) {
+            const prevMonthDay = new Date(year, month, -startingDayOfWeek + i + 1).getDate();
+            calendarHTML += `<div class="calendar-day other-month">
+                <div class="calendar-day-number">${prevMonthDay}</div>
+            </div>`;
+        }
+        
+        // Add days of current month
+        const today = new Date();
+        for (let day = 1; day <= daysInMonth; day++) {
+            const currentDate = new Date(year, month, day);
+            const isToday = currentDate.toDateString() === today.toDateString();
+            const dayEvents = monthEvents.filter(event => {
+                const eventDate = new Date(event.start);
+                return eventDate.getDate() === day;
+            });
+            
+            calendarHTML += `<div class="calendar-day ${isToday ? 'today' : ''}" onclick="app.selectCalendarDay(${year}, ${month}, ${day})">
+                <div class="calendar-day-number">${day}</div>
+                <div class="calendar-day-events">
+                    ${dayEvents.slice(0, 3).map(event => 
+                        `<div class="calendar-event ${event.type}" title="${event.title}">${event.title}</div>`
+                    ).join('')}
+                    ${dayEvents.length > 3 ? `<div class="calendar-event">+${dayEvents.length - 3} more</div>` : ''}
+                </div>
+            </div>`;
+        }
+        
+        // Add empty cells for days after month ends
+        const totalCells = calendarGrid.children.length;
+        const remainingCells = 42 - (startingDayOfWeek + daysInMonth); // 6 rows * 7 days = 42
+        for (let i = 1; i <= remainingCells && (startingDayOfWeek + daysInMonth + i - 1) < 42; i++) {
+            calendarHTML += `<div class="calendar-day other-month">
+                <div class="calendar-day-number">${i}</div>
+            </div>`;
+        }
+        
+        calendarGrid.innerHTML = calendarHTML;
+    }
+
+    getEventsForMonth(year, month) {
+        const events = [];
+        
+        // Add calendar events
+        if (this.data.calendarEvents) {
+            events.push(...this.data.calendarEvents.filter(event => {
+                const eventDate = new Date(event.start);
+                return eventDate.getFullYear() === year && eventDate.getMonth() === month;
+            }));
+        }
+        
+        // Add tasks as events
+        events.push(...this.data.tasks.filter(task => {
+            const taskDate = new Date(task.dueDate);
+            return taskDate.getFullYear() === year && taskDate.getMonth() === month;
+        }).map(task => ({
+            id: task.id,
+            title: task.title,
+            start: task.dueDate,
+            type: 'task',
+            source: 'internal'
+        })));
+        
+        // Add bookings as events
+        events.push(...this.data.bookings.filter(booking => {
+            const bookingDate = new Date(booking.date);
+            return bookingDate.getFullYear() === year && bookingDate.getMonth() === month;
+        }).map(booking => ({
+            id: booking.id,
+            title: booking.title,
+            start: booking.date,
+            type: 'booking',
+            source: 'internal'
+        })));
+        
+        // Add opportunities as events
+        events.push(...this.data.opportunities.filter(opportunity => {
+            const oppDate = new Date(opportunity.deadline);
+            return oppDate.getFullYear() === year && oppDate.getMonth() === month;
+        }).map(opportunity => ({
+            id: opportunity.id,
+            title: opportunity.title,
+            start: opportunity.deadline,
+            type: 'opportunity',
+            source: 'internal'
+        })));
+        
+        return events.sort((a, b) => new Date(a.start) - new Date(b.start));
+    }
+
+    renderUpcomingCalendarEvents() {
+        const container = document.getElementById('upcoming-events');
+        if (!container) return;
+        
+        const now = new Date();
+        const twoWeeksFromNow = new Date(now.getTime() + (14 * 24 * 60 * 60 * 1000));
+        
+        const upcomingEvents = [];
+        
+        // Add calendar events
+        if (this.data.calendarEvents) {
+            upcomingEvents.push(...this.data.calendarEvents.filter(event => {
+                const eventDate = new Date(event.start);
+                return eventDate >= now && eventDate <= twoWeeksFromNow;
+            }));
+        }
+        
+        // Add tasks
+        upcomingEvents.push(...this.data.tasks.filter(task => {
+            const taskDate = new Date(task.dueDate);
+            return !task.completed && taskDate >= now && taskDate <= twoWeeksFromNow;
+        }).map(task => ({
+            ...task,
+            start: task.dueDate,
+            type: 'task'
+        })));
+        
+        // Add bookings
+        upcomingEvents.push(...this.data.bookings.filter(booking => {
+            const bookingDate = new Date(booking.date);
+            return bookingDate >= now && bookingDate <= twoWeeksFromNow;
+        }).map(booking => ({
+            ...booking,
+            start: booking.date,
+            type: 'booking'
+        })));
+        
+        // Add opportunities
+        upcomingEvents.push(...this.data.opportunities.filter(opportunity => {
+            const oppDate = new Date(opportunity.deadline);
+            return oppDate >= now && oppDate <= twoWeeksFromNow;
+        }).map(opportunity => ({
+            ...opportunity,
+            start: opportunity.deadline,
+            type: 'opportunity'
+        })));
+        
+        // Sort by date
+        upcomingEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
+        
+        if (upcomingEvents.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-calendar-check"></i>
+                    <p>No upcoming events</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = upcomingEvents.map(event => {
+            const eventDate = new Date(event.start);
+            const artist = event.artistId ? this.data.artists.find(a => a.id === event.artistId) : null;
+            
+            return `
+                <div class="event-item ${event.type}">
+                    <div class="event-content">
+                        <div class="event-title">${event.title}</div>
+                        <div class="event-details">
+                            <div class="event-time">
+                                <i class="fas fa-clock"></i>
+                                ${eventDate.toLocaleDateString()} ${eventDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </div>
+                            <div class="event-type">
+                                <i class="fas fa-${event.type === 'task' ? 'tasks' : event.type === 'booking' ? 'calendar-alt' : event.type === 'opportunity' ? 'lightbulb' : 'calendar'}"></i>
+                                ${event.type.charAt(0).toUpperCase() + event.type.slice(1)}
+                            </div>
+                            ${artist ? `<span>${artist.name}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    previousMonth() {
+        this.currentCalendarDate.setMonth(this.currentCalendarDate.getMonth() - 1);
+        this.updateCalendarView();
+    }
+
+    nextMonth() {
+        this.currentCalendarDate.setMonth(this.currentCalendarDate.getMonth() + 1);
+        this.updateCalendarView();
+    }
+
+    selectCalendarDay(year, month, day) {
+        const selectedDate = new Date(year, month, day);
+        this.showNotification(`Selected ${selectedDate.toLocaleDateString()}`, 'info');
+        // You could add functionality here to show events for that day or create new events
+    }
+
+    addCalendarEvent() {
+        this.showModal('Add Calendar Event', `
+            <form id="calendar-event-form">
+                <div class="form-group">
+                    <label for="event-title">Event Title *</label>
+                    <input type="text" id="event-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="event-description">Description</label>
+                    <textarea id="event-description" placeholder="Event details..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="event-start-date">Start Date *</label>
+                    <input type="datetime-local" id="event-start-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="event-end-date">End Date</label>
+                    <input type="datetime-local" id="event-end-date">
+                </div>
+                <div class="form-group">
+                    <label for="event-artist">Related Artist</label>
+                    <select id="event-artist">
+                        <option value="">No specific artist</option>
+                        ${this.data.artists.map(artist => 
+                            `<option value="${artist.id}">${artist.name}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+            </form>
+        `, [
+            { text: 'Cancel', class: 'btn-secondary', action: 'close' },
+            { text: 'Add Event', class: 'btn-primary', action: () => this.saveCalendarEvent() }
+        ]);
+    }
+
+    saveCalendarEvent() {
+        const event = {
+            id: Date.now().toString(),
+            title: document.getElementById('event-title').value,
+            description: document.getElementById('event-description').value,
+            start: document.getElementById('event-start-date').value,
+            end: document.getElementById('event-end-date').value,
+            artistId: document.getElementById('event-artist').value,
+            type: 'calendar',
+            source: 'internal',
+            createdAt: new Date().toISOString()
+        };
+
+        if (!event.title.trim()) {
+            this.showNotification('Event title is required', 'error');
+            return;
+        }
+
+        if (!event.start) {
+            this.showNotification('Start date is required', 'error');
+            return;
+        }
+
+        if (!this.data.calendarEvents) {
+            this.data.calendarEvents = [];
+        }
+
+        this.data.calendarEvents.push(event);
+        
+        // If Google Calendar is connected, try to sync
+        if (typeof integrations !== 'undefined' && integrations.integrations.googleCalendar.connected) {
+            integrations.createCalendarEvent(event).then(() => {
+                this.showNotification('Event added and synced with Google Calendar', 'success');
+            }).catch(() => {
+                this.showNotification('Event added locally (sync failed)', 'info');
+            });
+        }
+        
+        this.saveData();
+        this.closeModal();
+        this.renderCalendar();
+        this.showNotification('Calendar event added successfully', 'success');
+    }
+
+    async syncCalendar() {
+        const syncButton = document.getElementById('sync-calendar-btn');
+        if (!syncButton) return;
+        
+        if (typeof integrations === 'undefined' || !integrations.integrations.googleCalendar.connected) {
+            this.showNotification('Please connect Google Calendar first in Settings', 'error');
+            return;
+        }
+        
+        syncButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+        syncButton.disabled = true;
+        
+        try {
+            const result = await integrations.getCalendarEvents();
+            if (result.success) {
+                // Merge Google Calendar events with local events
+                const googleEvents = result.events.filter(event => 
+                    !this.data.calendarEvents.some(localEvent => localEvent.id === event.id)
+                );
+                
+                if (!this.data.calendarEvents) {
+                    this.data.calendarEvents = [];
+                }
+                
+                this.data.calendarEvents.push(...googleEvents);
+                this.saveData();
+                this.renderCalendar();
+                this.showNotification(`Synced ${googleEvents.length} events from Google Calendar`, 'success');
+            }
+        } catch (error) {
+            this.showNotification('Failed to sync with Google Calendar', 'error');
+        } finally {
+            syncButton.innerHTML = '<i class="fas fa-sync"></i> Sync Calendar';
+            syncButton.disabled = false;
+        }
+    }
+
     // Task Management
     addTask() {
         this.showModal('Add Task', `
@@ -913,6 +1266,8 @@ class ArtistManagementHub {
                     bookings: [],
                     opportunities: [],
                     crises: [],
+                    tasks: [],
+                    calendarEvents: [],
                     settings: {
                         autoSave: true,
                         notifications: true,
@@ -987,6 +1342,7 @@ window.completeTask = (id) => app.completeTask(id);
 window.addBooking = () => app.addBooking();
 window.addOpportunity = () => app.addOpportunity();
 window.addCrisis = () => app.addCrisis();
+window.addCalendarEvent = () => app.addCalendarEvent();
 window.exportData = () => app.exportData();
 window.importData = () => app.importData();
 window.clearAllData = () => app.clearAllData();

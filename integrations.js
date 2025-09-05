@@ -205,6 +205,14 @@ class IntegrationsManager {
             this.integrations[service].config = { authCode: code };
             this.saveIntegrationStates();
             app.showNotification(`${this.integrations[service].name} connected successfully!`, 'success');
+            
+            // If Google Calendar was connected, update the calendar view
+            if (service === 'googleCalendar') {
+                if (typeof app !== 'undefined' && app.updateCalendarView) {
+                    app.updateCalendarView();
+                }
+            }
+            
             this.renderIntegrations();
         } catch (error) {
             app.showNotification(`Failed to complete ${this.integrations[service].name} authentication`, 'error');
@@ -237,9 +245,60 @@ class IntegrationsManager {
             throw new Error('Google Calendar not connected');
         }
         
-        // Implementation for creating calendar events
+        // In a real implementation, this would create an actual calendar event
+        // For now, we'll add it to our local calendar data
+        const calendarEvent = {
+            id: Date.now().toString(),
+            title: event.title,
+            start: event.start,
+            end: event.end || new Date(new Date(event.start).getTime() + 60 * 60 * 1000), // Default 1 hour
+            description: event.description || '',
+            type: 'calendar',
+            source: 'google'
+        };
+        
+        // Store in app data if available
+        if (typeof app !== 'undefined') {
+            if (!app.data.calendarEvents) {
+                app.data.calendarEvents = [];
+            }
+            app.data.calendarEvents.push(calendarEvent);
+            app.saveData();
+        }
+        
         console.log('Creating calendar event:', event);
-        return { success: true, message: 'Event created in Google Calendar' };
+        return { success: true, message: 'Event created in Google Calendar', event: calendarEvent };
+    }
+
+    async getCalendarEvents(startDate, endDate) {
+        if (!this.integrations.googleCalendar.connected) {
+            throw new Error('Google Calendar not connected');
+        }
+        
+        // In a real implementation, this would fetch from Google Calendar API
+        // For now, we'll return mock events to demonstrate the functionality
+        const mockEvents = [
+            {
+                id: 'mock1',
+                title: 'Studio Session',
+                start: new Date().toISOString(),
+                end: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+                description: 'Recording session for new track',
+                type: 'calendar',
+                source: 'google'
+            },
+            {
+                id: 'mock2',
+                title: 'Meeting with Label',
+                start: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                end: new Date(Date.now() + 25 * 60 * 60 * 1000).toISOString(),
+                description: 'Discuss upcoming releases',
+                type: 'calendar',
+                source: 'google'
+            }
+        ];
+        
+        return { success: true, events: mockEvents };
     }
 
     async updateGoogleSheet(sheetId, data) {

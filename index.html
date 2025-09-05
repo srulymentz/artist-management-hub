@@ -37,6 +37,10 @@
                     <i class="fas fa-exclamation-triangle"></i>
                     Crisis
                 </button>
+                <button class="nav-item" data-section="calendar">
+                    <i class="fas fa-calendar"></i>
+                    Calendar
+                </button>
                 <button class="nav-item" data-section="settings">
                     <i class="fas fa-cog"></i>
                     Settings
@@ -207,6 +211,46 @@
                         <i class="fas fa-shield-alt"></i>
                         <p>No active crises</p>
                         <small>Hopefully it stays that way!</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Calendar Section -->
+            <section id="calendar" class="content-section">
+                <div class="section-header">
+                    <h1>Calendar</h1>
+                    <div class="calendar-actions">
+                        <button class="btn-primary" onclick="app.addCalendarEvent()">
+                            <i class="fas fa-plus"></i>
+                            Add Event
+                        </button>
+                        <button class="btn-secondary" onclick="app.syncCalendar()" id="sync-calendar-btn">
+                            <i class="fas fa-sync"></i>
+                            Sync Calendar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button class="btn-outline" onclick="app.previousMonth()">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <h2 id="calendar-month-year"></h2>
+                        <button class="btn-outline" onclick="app.nextMonth()">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="calendar-grid" id="calendar-grid">
+                        <!-- Calendar will be rendered here -->
+                    </div>
+                    
+                    <div class="calendar-events">
+                        <h3>Upcoming Events</h3>
+                        <div class="events-list" id="upcoming-events">
+                            <!-- Events will be rendered here -->
+                        </div>
                     </div>
                 </div>
             </section>
