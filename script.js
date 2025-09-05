@@ -22,6 +22,14 @@ class ArtistManagementHub {
         this.setupEventListeners();
         this.updateDashboard();
         this.startAutoSave();
+        this.handleOAuthCallbacks();
+    }
+
+    handleOAuthCallbacks() {
+        // Handle OAuth callbacks from integrations
+        if (typeof integrations !== 'undefined') {
+            integrations.handleOAuthCallback();
+        }
     }
 
     // Data Management
@@ -113,6 +121,16 @@ class ArtistManagementHub {
             case 'crisis':
                 this.renderCrises();
                 break;
+            case 'settings':
+                this.renderSettings();
+                break;
+        }
+    }
+
+    renderSettings() {
+        // Render integrations when settings section is shown
+        if (typeof integrations !== 'undefined') {
+            integrations.renderIntegrations();
         }
     }
 

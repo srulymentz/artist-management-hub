@@ -6,6 +6,7 @@
     <title>Artist Management Hub</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css" rel="stylesheet">
 </head>
 <body>
     <div id="app">
@@ -224,21 +225,24 @@
                     <div class="settings-card">
                         <h3>API Integrations</h3>
                         <div class="integration-list">
-                            <div class="integration-item">
-                                <span>Gmail API</span>
-                                <button class="btn-outline">Configure</button>
+                            <!-- Integrations will be rendered here by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Integration Setup Guide</h3>
+                        <div class="setup-guide">
+                            <div class="guide-item">
+                                <h4>📝 Notion</h4>
+                                <p>Create an integration at <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a> and copy the Internal Integration Token.</p>
                             </div>
-                            <div class="integration-item">
-                                <span>Google Sheets</span>
-                                <button class="btn-outline">Configure</button>
+                            <div class="guide-item">
+                                <h4>📁 Dropbox</h4>
+                                <p>Create an app at <a href="https://www.dropbox.com/developers/apps" target="_blank">dropbox.com/developers/apps</a> and get your App Key.</p>
                             </div>
-                            <div class="integration-item">
-                                <span>Notion</span>
-                                <button class="btn-outline">Configure</button>
-                            </div>
-                            <div class="integration-item">
-                                <span>ChartMetric</span>
-                                <button class="btn-outline">Configure</button>
+                            <div class="guide-item">
+                                <h4>🔗 Google Services</h4>
+                                <p>Set up OAuth at <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a> and get your Client ID.</p>
                             </div>
                         </div>
                     </div>
@@ -250,6 +254,7 @@
     <!-- Modals will be dynamically created here -->
     <div id="modal-container"></div>
 
+    <script src="integrations.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
