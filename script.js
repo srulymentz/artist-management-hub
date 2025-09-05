@@ -144,7 +144,6 @@ class ArtistManagementHub {
         const totalRevenue = this.data.artists.reduce((sum, artist) => sum + (artist.monthlyRevenue || 0), 0);
         document.getElementById('revenue-total').textContent = `$${totalRevenue.toLocaleString()}`;
 
-        this.renderUpcomingTasks();
         this.renderRecentActivity();
     }
 
@@ -536,6 +535,8 @@ window.integrations = integrations;
 
 // Global functions for HTML onclick handlers
 window.addArtist = () => app.addArtist();
+window.addTask = () => app.addTask();
+window.completeTask = (id) => app.completeTask(id);
 window.addBooking = () => app.addBooking();
 window.addOpportunity = () => app.addOpportunity();
 window.addCrisis = () => app.addCrisis();
