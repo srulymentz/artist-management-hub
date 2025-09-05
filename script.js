@@ -439,7 +439,7 @@ class ArtistManagementHub {
             task.completed = true;
             task.completedAt = new Date().toISOString();
             this.saveData();
-            this.updateDashboard();
+            this.renderUpcomingTasks();
             this.showNotification('Task completed!', 'success');
         }
     }
