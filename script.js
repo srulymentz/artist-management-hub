@@ -144,6 +144,7 @@ class ArtistManagementHub {
         const totalRevenue = this.data.artists.reduce((sum, artist) => sum + (artist.monthlyRevenue || 0), 0);
         document.getElementById('revenue-total').textContent = `$${totalRevenue.toLocaleString()}`;
 
+        this.renderUpcomingTasks();
         this.renderRecentActivity();
     }
 
