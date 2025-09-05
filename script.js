@@ -695,17 +695,8 @@ class ArtistManagementApp {
     }
 
     renderSettings() {
-        // Render integrations immediately
-        if (window.integrations) {
-            window.integrations.renderIntegrations();
-        } else {
-            // If integrations not loaded, try again after a short delay
-            setTimeout(() => {
-                if (window.integrations) {
-                    window.integrations.renderIntegrations();
-                }
-            }, 100);
-        }
+        // Settings are now rendered in HTML, integrations will work via onclick handlers
+        console.log('Settings rendered');
     }
 
     // Navigation methods

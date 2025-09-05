@@ -284,7 +284,56 @@
                     <div class="settings-card">
                         <h3>API Integrations</h3>
                         <div class="integration-list">
-                            <!-- Integrations will be rendered here by JavaScript -->
+                            <div class="integration-item">
+                                <div class="integration-info">
+                                    <i class="fas fa-sticky-note"></i>
+                                    <span>Notion</span>
+                                    <span class="status-badge disconnected">Not Connected</span>
+                                </div>
+                                <div class="integration-actions">
+                                    <button class="btn-primary" onclick="window.integrations.connect('notion')">Connect</button>
+                                </div>
+                            </div>
+                            <div class="integration-item">
+                                <div class="integration-info">
+                                    <i class="fab fa-dropbox"></i>
+                                    <span>Dropbox</span>
+                                    <span class="status-badge disconnected">Not Connected</span>
+                                </div>
+                                <div class="integration-actions">
+                                    <button class="btn-primary" onclick="window.integrations.connect('dropbox')">Connect</button>
+                                </div>
+                            </div>
+                            <div class="integration-item">
+                                <div class="integration-info">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>Google Calendar</span>
+                                    <span class="status-badge disconnected">Not Connected</span>
+                                </div>
+                                <div class="integration-actions">
+                                    <button class="btn-primary" onclick="window.integrations.connect('googleCalendar')">Connect</button>
+                                </div>
+                            </div>
+                            <div class="integration-item">
+                                <div class="integration-info">
+                                    <i class="fas fa-table"></i>
+                                    <span>Google Sheets</span>
+                                    <span class="status-badge disconnected">Not Connected</span>
+                                </div>
+                                <div class="integration-actions">
+                                    <button class="btn-primary" onclick="window.integrations.connect('googleSheets')">Connect</button>
+                                </div>
+                            </div>
+                            <div class="integration-item">
+                                <div class="integration-info">
+                                    <i class="fas fa-envelope"></i>
+                                    <span>Gmail</span>
+                                    <span class="status-badge disconnected">Not Connected</span>
+                                </div>
+                                <div class="integration-actions">
+                                    <button class="btn-primary" onclick="window.integrations.connect('gmail')">Connect</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
