@@ -264,7 +264,6 @@ class ArtistManagementHub {
                     </div>
                 </div>
                 <div class="artist-details">
-                    <p><strong>Genre:</strong> ${artist.genre || 'Not specified'}</p>
                     <p><strong>Monthly Revenue:</strong> $${(artist.monthlyRevenue || 0).toLocaleString()}</p>
                 </div>
                 <div class="artist-stats">
