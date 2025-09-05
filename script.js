@@ -92,6 +92,95 @@ class ArtistManagementApp {
             calendarEvents: []
         };
         
+        // Initialize with Adam Sellouk and his bookings
+        this.data = {
+            artists: [
+                {
+                    id: 'adam-sellouk',
+                    name: 'Adam Sellouk',
+                    genre: 'Electronic, House, Techno',
+                    status: 'established',
+                    email: 'adam@adamsellouk.com',
+                    phone: '+1-555-0123',
+                    monthlyRevenue: 35000,
+                    milestone: 'Ultra Europe 2026 main stage',
+                    progress: 75,
+                    nextGoals: 'Major festival circuit expansion',
+                    socialMedia: {
+                        instagram: '@adamsellouk',
+                        soundcloud: 'adamsellouk',
+                        spotify: 'Adam Sellouk'
+                    }
+                }
+            ],
+            bookings: [
+                {
+                    id: 'booking1',
+                    artistId: 'adam-sellouk',
+                    artistName: 'Adam Sellouk',
+                    venue: 'Flight TLV-ATH-SAW',
+                    date: '2025-09-13',
+                    time: '05:00',
+                    fee: 351,
+                    status: 'confirmed',
+                    type: 'travel',
+                    details: 'Aegean/Pegasus - Confirmation: XXASFT/16PU8S'
+                },
+                {
+                    id: 'booking2',
+                    artistId: 'adam-sellouk',
+                    artistName: 'Adam Sellouk',
+                    venue: 'Flight IST-RMO-TLV',
+                    date: '2025-09-14',
+                    time: '09:30',
+                    fee: 213,
+                    status: 'confirmed',
+                    type: 'travel',
+                    details: 'FlyOne - Confirmation: G89DTG'
+                },
+                {
+                    id: 'booking3',
+                    artistId: 'adam-sellouk',
+                    artistName: 'Adam Sellouk',
+                    venue: 'Flight TLV-MXP',
+                    date: '2025-09-19',
+                    time: '04:55',
+                    fee: 356,
+                    status: 'confirmed',
+                    type: 'travel',
+                    details: 'Neos - Confirmation: 9A8CIE'
+                },
+                {
+                    id: 'booking4',
+                    artistId: 'adam-sellouk',
+                    artistName: 'Adam Sellouk',
+                    venue: 'Flight MXP-IBZ',
+                    date: '2025-09-19',
+                    time: '14:20',
+                    fee: 254,
+                    status: 'confirmed',
+                    type: 'travel',
+                    details: 'Easy Jet - Confirmation: KB2HZZ4'
+                },
+                {
+                    id: 'booking5',
+                    artistId: 'adam-sellouk',
+                    artistName: 'Adam Sellouk',
+                    venue: 'Ibiza Show',
+                    date: '2025-09-19',
+                    time: '20:00',
+                    fee: 5000,
+                    status: 'confirmed',
+                    type: 'performance',
+                    details: 'Performance: 20:00-21:30'
+                }
+            ],
+            opportunities: [],
+            crises: [],
+            tasks: [],
+            calendarEvents: []
+        };
+        
         this.currentSection = 'dashboard';
         this.currentDate = new Date();
         
@@ -605,8 +694,6 @@ class ArtistManagementApp {
 
     renderSettings() {
         if (window.integrations) {
-            window.integrations.renderIntegrations();
-        }
             window.integrations.renderIntegrations();
         }
     }
