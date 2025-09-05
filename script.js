@@ -267,33 +267,13 @@ class ArtistManagementApp {
 
     renderBookings() {
         const container = document.getElementById('bookings-list');
-        console.log('=== BOOKINGS DEBUG ===');
-        console.log('Container found:', !!container);
-        console.log('Bookings data:', this.data.bookings);
-        console.log('Bookings length:', this.data.bookings.length);
         
         if (!container) {
-            console.log('ERROR: bookings-list container not found!');
+            console.error('ERROR: bookings-list container not found!');
             return;
         }
         
-        // Force show bookings even if array is empty for testing
-        container.innerHTML = `
-            <div style="background: white; padding: 20px; border-radius: 8px;">
-                <h3>Bookings Debug Info:</h3>
-                <p>Bookings count: ${this.data.bookings.length}</p>
-                <p>Data: ${JSON.stringify(this.data.bookings, null, 2)}</p>
-                
-                <div style="margin-top: 20px;">
-                    <h4>Test Booking Display:</h4>
-                    <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
-                        <strong>Adam Sellouk</strong> - Flight TLV-ATH-SAW<br>
-                        Date: Sept 13, 2025 | Fee: $351.00<br>
-                        Status: Confirmed | Type: Travel
-                    </div>
-                </div>
-            </div>
-        `;
+        console.log('Rendering bookings:', this.data.bookings.length, 'bookings found');
         
         if (this.data.bookings.length === 0) {
             container.innerHTML = `
@@ -492,11 +472,77 @@ class ArtistManagementApp {
             const saved = localStorage.getItem('artistManagementData');
             if (saved) {
                 const savedData = JSON.parse(saved);
-                // Merge with default data, keeping existing data if available
-                this.data = { ...this.data, ...savedData };
+                // Merge with default data, but always keep our bookings
+                this.data = { 
+                    ...this.data, 
+                    ...savedData,
+                    // Force our bookings to always be there
+                    bookings: this.data.bookings
+                };
             }
         } catch (error) {
             console.error('Error loading data:', error);
+        }
+        
+        // Ensure we always have our booking data
+        if (!this.data.bookings || this.data.bookings.length === 0) {
+            this.data.bookings = [
+                {
+                    id: 'booking1',
+                    artistName: 'Adam Sellouk',
+                    venue: 'Flight TLV-ATH-SAW',
+                    date: '2025-09-13',
+                    time: '05:00',
+                    fee: 351,
+                    status: 'confirmed',
+                    type: 'travel',
+                    details: 'Aegean/Pegasus - Confirmation: XXASFT/16PU8S'
+                },
+                {
+                    id: 'booking2',
+                    artistName: 'Adam Sellouk',
+                    venue: 'Flight IST-RMO-TLV',
+                    date: '2025-09-14',
+                    time: '09:30',
+                    fee: 213,
+                    status: 'confirmed',
+                    type: 'travel',
+                    details: 'FlyOne - Confirmation: G89DTG'
+                },
+                {
+                    id: 'booking3',
+                    artistName: 'Adam Sellouk',
+                    venue: 'Flight TLV-MXP',
+                    date: '2025-09-19',
+                    time: '04:55',
+                    fee: 356,
+                    status: 'confirmed',
+                    type: 'travel',
+                    details: 'Neos - Confirmation: 9A8CIE'
+                },
+                {
+                    id: 'booking4',
+                    artistName: 'Adam Sellouk',
+                    venue: 'Flight MXP-IBZ',
+                    date: '2025-09-19',
+                    time: '14:20',
+                    fee: 254,
+                    status: 'confirmed',
+                    type: 'travel',
+                    details: 'Easy Jet - Confirmation: KB2HZZ4'
+                },
+                {
+                    id: 'booking5',
+                    artistName: 'Adam Sellouk',
+                    venue: 'Ibiza Show',
+                    date: '2025-09-19',
+                    time: '20:00',
+                    fee: 5000,
+                    status: 'confirmed',
+                    type: 'performance',
+                    details: 'Performance: 20:00-21:30'
+                }
+            ];
         }
     }
 
