@@ -72,8 +72,8 @@ class IntegrationsManager {
             const token = prompt('Enter your Notion Integration Token (starts with secret_):');
             if (!token) return;
             
-            if (!token.startsWith('secret_')) {
-                app.showNotification('Invalid token format. Token should start with "secret_"', 'error');
+            if (!token.startsWith('secret_') && !token.startsWith('ntn_')) {
+                app.showNotification('Invalid token format. Token should start with "secret_" or "ntn_"', 'error');
                 return;
             }
 
