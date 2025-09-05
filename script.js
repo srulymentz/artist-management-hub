@@ -180,7 +180,7 @@ class ArtistManagementApp {
     renderDashboard() {
         // Update stats
         document.getElementById('artist-count').textContent = this.data.artists.length;
-        document.getElementById('booking-count').textContent = this.data.bookings.filter(b => b.status === 'confirmed').length;
+        document.getElementById('booking-count').textContent = this.data.bookings.filter(b => b.status === 'confirmed' && b.type === 'performance').length;
         document.getElementById('opportunity-count').textContent = this.data.opportunities.length;
         
         // Calculate total revenue
@@ -274,7 +274,7 @@ class ArtistManagementApp {
                 </div>
                 <div class="artist-stats">
                     <div class="artist-stat">
-                        <div class="artist-stat-number">${this.data.bookings.filter(b => b.artistId === artist.id).length}</div>
+                        <div class="artist-stat-number">${this.data.bookings.filter(b => b.artistId === artist.id && b.type === 'performance').length}</div>
                         <div class="artist-stat-label">Bookings</div>
                     </div>
                     <div class="artist-stat">
@@ -329,8 +329,8 @@ class ArtistManagementApp {
                         <div class="overview-section">
                             <h4>Performance Stats</h4>
                             <p><strong>Monthly Revenue:</strong> $${(artist.monthlyRevenue || 0).toLocaleString()}</p>
-                            <p><strong>Total Bookings:</strong> ${artistBookings.length}</p>
-                            <p><strong>Confirmed Shows:</strong> ${artistBookings.filter(b => b.status === 'confirmed').length}</p>
+                            <p><strong>Total Bookings:</strong> ${artistBookings.filter(b => b.type === 'performance').length}</p>
+                            <p><strong>Confirmed Shows:</strong> ${artistBookings.filter(b => b.status === 'confirmed' && b.type === 'performance').length}</p>
                         </div>
                         <div class="overview-section">
                             <h4>Current Milestone</h4>
@@ -425,11 +425,14 @@ class ArtistManagementApp {
             return;
         }
         
-        if (this.data.bookings.length === 0) {
+        // Filter to only show performance bookings
+        const performanceBookings = this.data.bookings.filter(booking => booking.type === 'performance');
+        
+        if (performanceBookings.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-calendar-plus"></i>
-                    <p>No booking offers yet</p>
+                    <p>No performance bookings yet</p>
                     <button class="btn-secondary" onclick="addBooking()">Add Your First Booking</button>
                 </div>
             `;
@@ -448,7 +451,7 @@ class ArtistManagementApp {
                     <div class="booking-col">Type</div>
                     <div class="booking-col">Actions</div>
                 </div>
-                ${this.data.bookings.map(booking => `
+                ${performanceBookings.map(booking => `
                     <div class="booking-row">
                         <div class="booking-col">${booking.artistName}</div>
                         <div class="booking-col">${booking.venue}</div>
