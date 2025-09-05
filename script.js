@@ -197,9 +197,11 @@ class ArtistManagementApp {
         this.renderBookings();
         this.renderCalendar();
         
-        // Handle OAuth callbacks
+        // Handle OAuth callbacks and ensure integrations are ready
         if (window.integrations) {
             window.integrations.handleOAuthCallback();
+            // Make sure integrations are available globally
+            window.integrations.renderIntegrations();
         }
     }
 
@@ -693,12 +695,17 @@ class ArtistManagementApp {
     }
 
     renderSettings() {
-        // Ensure integrations are rendered when settings tab is shown
-        setTimeout(() => {
-            if (window.integrations) {
-                window.integrations.renderIntegrations();
-            }
-        }, 100);
+        // Render integrations immediately
+        if (window.integrations) {
+            window.integrations.renderIntegrations();
+        } else {
+            // If integrations not loaded, try again after a short delay
+            setTimeout(() => {
+                if (window.integrations) {
+                    window.integrations.renderIntegrations();
+                }
+            }, 100);
+        }
     }
 
     // Navigation methods
