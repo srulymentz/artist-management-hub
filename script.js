@@ -2,6 +2,8 @@
 class ArtistManagementApp {
     constructor() {
         console.log('App starting...');
+        
+        // Initialize with clean, working data
         this.data = {
             artists: [
                 {
@@ -90,11 +92,11 @@ class ArtistManagementApp {
             calendarEvents: []
         };
         
-        console.log('Initial bookings:', this.data.bookings);
         this.currentSection = 'dashboard';
         this.currentDate = new Date();
         
-        this.loadData();
+        // Don't load from localStorage - use fresh data
+        this.syncBookingsToCalendar();
         this.initializeApp();
     }
 
@@ -178,7 +180,7 @@ class ArtistManagementApp {
     renderDashboard() {
         // Update stats
         document.getElementById('artist-count').textContent = this.data.artists.length;
-        document.getElementById('booking-count').textContent = this.data.bookings.filter(b => b.status === 'pending').length;
+        document.getElementById('booking-count').textContent = this.data.bookings.filter(b => b.status === 'confirmed').length;
         document.getElementById('opportunity-count').textContent = this.data.opportunities.length;
         
         // Calculate total revenue
@@ -423,8 +425,6 @@ class ArtistManagementApp {
             return;
         }
         
-        console.log('Rendering bookings:', this.data.bookings.length, 'bookings found');
-        
         if (this.data.bookings.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
@@ -507,9 +507,6 @@ class ArtistManagementApp {
         const calendarGrid = document.getElementById('calendar-grid');
         
         if (!monthYear || !calendarGrid) return;
-
-        // Make sure bookings are synced to calendar
-        this.syncBookingsToCalendar();
 
         const year = this.currentDate.getFullYear();
         const month = this.currentDate.getMonth();
@@ -625,89 +622,6 @@ class ArtistManagementApp {
         // TODO: Implement calendar event creation
     }
 
-    // Data management
-    loadData() {
-        try {
-            const saved = localStorage.getItem('artistManagementData');
-            if (saved) {
-                const savedData = JSON.parse(saved);
-                // Merge with default data, but always keep our bookings
-                this.data = { 
-                    ...this.data, 
-                    ...savedData,
-                    // Force our bookings to always be there
-                    bookings: this.data.bookings
-                };
-            }
-        } catch (error) {
-            console.error('Error loading data:', error);
-        }
-        
-        // Ensure we always have our booking data
-        if (!this.data.bookings || this.data.bookings.length === 0) {
-            this.data.bookings = [
-                {
-                    id: 'booking1',
-                    artistName: 'Adam Sellouk',
-                    venue: 'Flight TLV-ATH-SAW',
-                    date: '2025-09-13',
-                    time: '05:00',
-                    fee: 351,
-                    status: 'confirmed',
-                    type: 'travel',
-                    details: 'Aegean/Pegasus - Confirmation: XXASFT/16PU8S'
-                },
-                {
-                    id: 'booking2',
-                    artistName: 'Adam Sellouk',
-                    venue: 'Flight IST-RMO-TLV',
-                    date: '2025-09-14',
-                    time: '09:30',
-                    fee: 213,
-                    status: 'confirmed',
-                    type: 'travel',
-                    details: 'FlyOne - Confirmation: G89DTG'
-                },
-                {
-                    id: 'booking3',
-                    artistName: 'Adam Sellouk',
-                    venue: 'Flight TLV-MXP',
-                    date: '2025-09-19',
-                    time: '04:55',
-                    fee: 356,
-                    status: 'confirmed',
-                    type: 'travel',
-                    details: 'Neos - Confirmation: 9A8CIE'
-                },
-                {
-                    id: 'booking4',
-                    artistName: 'Adam Sellouk',
-                    venue: 'Flight MXP-IBZ',
-                    date: '2025-09-19',
-                    time: '14:20',
-                    fee: 254,
-                    status: 'confirmed',
-                    type: 'travel',
-                    details: 'Easy Jet - Confirmation: KB2HZZ4'
-                },
-                {
-                    id: 'booking5',
-                    artistName: 'Adam Sellouk',
-                    venue: 'Ibiza Show',
-                    date: '2025-09-19',
-                    time: '20:00',
-                    fee: 5000,
-                    status: 'confirmed',
-                    type: 'performance',
-                    details: 'Performance: 20:00-21:30'
-                }
-            ];
-        }
-        
-        // Automatically sync bookings to calendar events
-        this.syncBookingsToCalendar();
-    }
-
     syncBookingsToCalendar() {
         // Clear existing booking-based calendar events
         this.data.calendarEvents = this.data.calendarEvents.filter(event => event.source !== 'booking');
@@ -729,8 +643,12 @@ class ArtistManagementApp {
                 this.data.calendarEvents.push(calendarEvent);
             }
         });
-        
-        console.log('Synced bookings to calendar:', this.data.calendarEvents.length, 'events');
+    }
+
+    // Data management
+    loadData() {
+        // Don't load from localStorage for now - use fresh data
+        this.syncBookingsToCalendar();
     }
 
     saveData() {
