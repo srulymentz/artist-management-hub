@@ -626,8 +626,6 @@ class ArtistManagementHub {
         const artist = {
             id: editId || Date.now().toString(),
             name: document.getElementById('artist-name').value,
-            genre: document.getElementById('artist-genre').value,
-            status: document.getElementById('artist-status').value,
             monthlyRevenue: parseInt(document.getElementById('artist-revenue').value) || 0,
             notes: document.getElementById('artist-notes').value,
             createdAt: editId ? this.data.artists.find(a => a.id === editId)?.createdAt : new Date().toISOString(),
