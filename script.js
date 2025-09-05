@@ -288,6 +288,133 @@ class ArtistManagementApp {
         `).join('');
     }
 
+    viewArtist(artistId) {
+        const artist = this.data.artists.find(a => a.id === artistId);
+        if (!artist) return;
+
+        const artistBookings = this.data.bookings.filter(b => b.artistId === artistId);
+        const artistOpportunities = this.data.opportunities.filter(o => o.artistId === artistId);
+        const artistTasks = this.data.tasks.filter(t => t.artistId === artistId);
+
+        this.showModal(`
+            <div class="artist-detail-view">
+                <div class="artist-detail-header">
+                    <div class="artist-detail-title">
+                        <h2>${artist.name}</h2>
+                        <span class="artist-status ${artist.status}">${artist.status}</span>
+                    </div>
+                    <button class="btn-outline" onclick="app.editArtist('${artistId}')">
+                        <i class="fas fa-edit"></i>
+                        Edit Artist
+                    </button>
+                </div>
+
+                <div class="artist-detail-tabs">
+                    <button class="artist-tab active" onclick="app.showArtistTab('overview')">Overview</button>
+                    <button class="artist-tab" onclick="app.showArtistTab('bookings')">Bookings (${artistBookings.length})</button>
+                    <button class="artist-tab" onclick="app.showArtistTab('opportunities')">Opportunities (${artistOpportunities.length})</button>
+                    <button class="artist-tab" onclick="app.showArtistTab('tasks')">Tasks (${artistTasks.length})</button>
+                </div>
+
+                <div class="artist-tab-content active" id="artist-overview">
+                    <div class="artist-overview-grid">
+                        <div class="overview-section">
+                            <h4>Contact Information</h4>
+                            <p><strong>Email:</strong> ${artist.email}</p>
+                            <p><strong>Phone:</strong> ${artist.phone}</p>
+                            <p><strong>Genre:</strong> ${artist.genre}</p>
+                        </div>
+                        <div class="overview-section">
+                            <h4>Performance Stats</h4>
+                            <p><strong>Monthly Revenue:</strong> $${(artist.monthlyRevenue || 0).toLocaleString()}</p>
+                            <p><strong>Total Bookings:</strong> ${artistBookings.length}</p>
+                            <p><strong>Confirmed Shows:</strong> ${artistBookings.filter(b => b.status === 'confirmed').length}</p>
+                        </div>
+                        <div class="overview-section">
+                            <h4>Current Milestone</h4>
+                            <p><strong>Goal:</strong> ${artist.milestone || 'No milestone set'}</p>
+                            <p><strong>Progress:</strong> ${artist.progress || 0}%</p>
+                            <p><strong>Next Goals:</strong> ${artist.nextGoals || 'No goals set'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="artist-tab-content" id="artist-bookings">
+                    <div class="artist-items-list">
+                        ${artistBookings.length === 0 ? '<p>No bookings yet</p>' : 
+                            artistBookings.map(booking => `
+                                <div class="artist-item">
+                                    <h4>${booking.venue}</h4>
+                                    <p><strong>Date:</strong> ${new Date(booking.date).toLocaleDateString()} at ${booking.time}</p>
+                                    <p><strong>Fee:</strong> $${booking.fee.toLocaleString()}</p>
+                                    <p><strong>Status:</strong> <span class="status-badge ${booking.status}">${booking.status}</span></p>
+                                    <p><strong>Type:</strong> <span class="type-badge ${booking.type}">${booking.type}</span></p>
+                                    <p><strong>Details:</strong> ${booking.details}</p>
+                                </div>
+                            `).join('')
+                        }
+                    </div>
+                </div>
+
+                <div class="artist-tab-content" id="artist-opportunities">
+                    <div class="artist-items-list">
+                        ${artistOpportunities.length === 0 ? '<p>No opportunities yet</p>' : 
+                            artistOpportunities.map(opp => `
+                                <div class="artist-item">
+                                    <h4>${opp.title}</h4>
+                                    <p>${opp.description}</p>
+                                </div>
+                            `).join('')
+                        }
+                    </div>
+                </div>
+
+                <div class="artist-tab-content" id="artist-tasks">
+                    <div class="artist-items-list">
+                        ${artistTasks.length === 0 ? '<p>No tasks yet</p>' : 
+                            artistTasks.map(task => `
+                                <div class="artist-item">
+                                    <h4>${task.title}</h4>
+                                    <p><strong>Due:</strong> ${new Date(task.dueDate).toLocaleDateString()}</p>
+                                    <p><strong>Priority:</strong> ${task.priority}</p>
+                                </div>
+                            `).join('')
+                        }
+                    </div>
+                </div>
+            </div>
+        `);
+    }
+
+    showArtistTab(tabName) {
+        // Remove active class from all tabs and content
+        document.querySelectorAll('.artist-tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.artist-tab-content').forEach(content => content.classList.remove('active'));
+        
+        // Add active class to clicked tab and corresponding content
+        event.target.classList.add('active');
+        document.getElementById(`artist-${tabName}`).classList.add('active');
+    }
+
+    showModal(content) {
+        const modalContainer = document.getElementById('modal-container');
+        modalContainer.innerHTML = `
+            <div class="modal-overlay" onclick="this.remove()">
+                <div class="modal" onclick="event.stopPropagation()">
+                    <div class="modal-header">
+                        <h2>Artist Details</h2>
+                        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-content">
+                        ${content}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     renderBookings() {
         const container = document.getElementById('bookings-list');
         
