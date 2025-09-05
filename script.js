@@ -607,6 +607,8 @@ class ArtistManagementApp {
         if (window.integrations) {
             window.integrations.renderIntegrations();
         }
+            window.integrations.renderIntegrations();
+        }
     }
 
     // Navigation methods
