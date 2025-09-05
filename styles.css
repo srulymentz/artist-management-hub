@@ -852,6 +852,88 @@ body {
     margin-top: 2rem;
 }
 
+/* Bookings Table Styles */
+.bookings-table {
+    width: 100%;
+}
+
+.bookings-header {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    background: #667eea;
+    color: white;
+    font-weight: 600;
+    border-radius: 8px 8px 0 0;
+}
+
+.booking-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    align-items: center;
+}
+
+.booking-row:hover {
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.booking-col {
+    font-size: 0.9rem;
+}
+
+.booking-details {
+    padding: 0.5rem 1rem;
+    background: rgba(102, 126, 234, 0.05);
+    border-bottom: 1px solid #eee;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.status-badge.confirmed {
+    background: #27ae60;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-badge.pending {
+    background: #f39c12;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.type-badge.travel {
+    background: #3498db;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.type-badge.performance {
+    background: #e74c3c;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .navbar {
